@@ -3,143 +3,167 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>متجر باينري - Binary Store</title>
-    <!-- مكتبة تليجرام الرسمية لربط الواجهة بالبوت -->
+    <title>مكتبة ميم</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    
     <style>
+        /* التزامن الكامل مع ثيم تليجرام */
         :root {
-            --bg-color: var(--tg-theme-bg-color, #f4f4f9);
-            --text-color: var(--tg-theme-text-color, #222);
-            --btn-color: var(--tg-theme-button-color, #0088cc);
-            --btn-text: var(--tg-theme-button-text-color, #fff);
+            --bg-color: var(--tg-theme-bg-color, #f0f2f5);
             --card-bg: var(--tg-theme-secondary-bg-color, #ffffff);
+            --primary: var(--tg-theme-button-color, #1877f2);
+            --text-main: var(--tg-theme-text-color, #1c1e21);
+            --text-muted: var(--tg-theme-hint-color, #65676b);
+            --btn-text: var(--tg-theme-button-text-color, #ffffff);
         }
-        body { 
-            font-family: system-ui, -apple-system, sans-serif; 
-            background: var(--bg-color); 
-            color: var(--text-color); 
-            margin: 0; 
-            padding: 15px; 
-            padding-bottom: 80px; /* مسافة للزر السفلي */
-        }
-        .header { text-align: center; margin-bottom: 20px; }
-        .cart-summary { background: #e3f2fd; color: #0d47a1; padding: 12px; border-radius: 10px; text-align: center; font-weight: bold; margin-bottom: 20px; border: 1px solid #bbdefb; }
+        body { font-family: system-ui, -apple-system, sans-serif; background: var(--bg-color); color: var(--text-main); margin: 0; padding-bottom: 80px; transition: all 0.3s ease; }
         
-        .product-card { 
-            background: var(--card-bg); 
-            border-radius: 15px; 
-            padding: 15px; 
-            margin-bottom: 15px; 
-            box-shadow: 0 4px 8px rgba(0,0,0,0.05); 
-            display: flex; 
-            align-items: center; 
-            justify-content: space-between;
-            border: 1px solid rgba(0,0,0,0.05);
-        }
-        .product-info h3 { margin: 0 0 5px 0; font-size: 16px; font-weight: 700;}
-        .product-info p { margin: 0; color: #2e7d32; font-weight: bold; font-size: 14px;}
-        .btn-add { background: var(--btn-color); color: var(--btn-text); border: none; padding: 8px 16px; border-radius: 20px; cursor: pointer; font-weight: bold; transition: 0.2s;}
-        .btn-add:active { opacity: 0.7; transform: scale(0.95); }
+        .header { background: var(--card-bg); padding: 15px; text-align: center; border-bottom: 1px solid rgba(128,128,128,0.2); }
+        .header h2 { margin: 0; color: var(--primary); font-size: 22px; }
         
-        .form-section { background: var(--card-bg); padding: 15px; border-radius: 15px; margin-top: 25px; box-shadow: 0 4px 8px rgba(0,0,0,0.05); }
-        .form-section h3 { margin-top: 0; font-size: 16px; border-bottom: 2px solid #f0f0f0; padding-bottom: 10px;}
-        input, select { 
-            width: 100%; 
-            padding: 12px; 
-            margin-bottom: 12px; 
-            border: 1px solid #ddd; 
-            border-radius: 10px; 
-            box-sizing: border-box; 
-            font-family: inherit;
-            background: var(--bg-color);
-            color: var(--text-color);
-        }
-        input:focus { outline: none; border-color: var(--btn-color); }
+        /* تأثيرات حركية (Animations) */
+        .product-card { background: var(--card-bg); border-radius: 12px; padding: 15px; margin: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); transform: scale(1); transition: transform 0.2s; }
+        .product-card:active { transform: scale(0.98); }
+        
+        .flex-between { display: flex; justify-content: space-between; align-items: center; }
+        .btn-action { background: var(--primary); color: var(--btn-text); border: none; padding: 8px 15px; border-radius: 8px; cursor: pointer; font-weight: bold; margin-top: 10px; width: 100%; display: flex; justify-content: center; align-items: center; gap: 5px;}
+        
+        .form-section { background: var(--card-bg); padding: 15px; margin: 15px; border-radius: 12px; }
+        input { width: 100%; padding: 12px; margin-bottom: 10px; border-radius: 8px; border: 1px solid rgba(128,128,128,0.3); background: var(--bg-color); color: var(--text-main); box-sizing: border-box; }
+        
+        .tools-row { display: flex; gap: 10px; margin-bottom: 10px; }
     </style>
 </head>
 <body>
+
     <div class="header">
-        <h2>🛒 متجر باينري - Binary Store</h2>
-        <p>اختر المنتجات واملأ بياناتك للتوصيل</p>
+        <h2>📚 مكتبة ميم</h2>
     </div>
 
-    <div class="cart-summary" id="cartSummary">
-        السلة فارغة - الإجمالي: 0 د.ع
-    </div>
-
-    <!-- قائمة المنتجات (تقدر تضيف وتعدل عليها براحتك) -->
-    <div class="product-card">
-        <div class="product-info">
-            <h3>تصميم لوكو احترافي</h3>
-            <p>25,000 د.ع</p>
-        </div>
-        <button class="btn-add" onclick="addToCart('تصميم لوكو احترافي', 25000)">إضافة</button>
+    <!-- زر الماسح الضوئي -->
+    <div style="padding: 0 15px; margin-top: 15px;">
+        <button class="btn-action" onclick="scanQR()">📷 امسح باركود الملزمة</button>
     </div>
 
     <div class="product-card">
-        <div class="product-info">
-            <h3>طباعة ستيكرات (100 قطعة)</h3>
-            <p>15,000 د.ع</p>
+        <div class="flex-between">
+            <div>
+                <h3 style="margin:0 0 5px 0;">ملزمة بلدوزر التحصيلي</h3>
+                <span style="color: var(--primary); font-weight: bold;">15,000 د.ع</span>
+            </div>
+            <div style="display: flex; gap: 10px; align-items: center;">
+                <button class="btn-action" style="width: auto; margin:0;" onclick="updateCart('ملزمة بلدوزر التحصيلي', 15000, -1)">-</button>
+                <span id="qty-ملزمة بلدوزر التحصيلي" style="font-weight:bold;">0</span>
+                <button class="btn-action" style="width: auto; margin:0;" onclick="updateCart('ملزمة بلدوزر التحصيلي', 15000, 1)">+</button>
+            </div>
         </div>
-        <button class="btn-add" onclick="addToCart('طباعة ستيكرات (100 قطعة)', 15000)">إضافة</button>
     </div>
 
-    <!-- نموذج معلومات الزبون -->
     <div class="form-section">
         <h3>📍 معلومات التوصيل:</h3>
-        <input type="text" id="fullName" placeholder="الاسم الكامل" required>
-        <input type="tel" id="phone" placeholder="رقم الهاتف (مثال: 077...)" required>
-        <input type="text" id="address" placeholder="المحافظة - المنطقة - أقرب نقطة دالة" required>
+        <input type="text" id="fullName" placeholder="الاسم الكامل" onchange="saveData()">
+        <input type="tel" id="phone" placeholder="رقم الهاتف" onchange="saveData()">
+        
+        <div class="tools-row">
+            <input type="text" id="address" placeholder="العنوان التفصيلي" onchange="saveData()">
+            <button class="btn-action" style="width: 45px; margin:0;" onclick="getLocation()">📍</button>
+        </div>
     </div>
 
     <script>
-        // تهيئة مكتبة تليجرام
         let tg = window.Telegram.WebApp;
-        tg.expand(); // يخلي الواجهة تفتح بحجم الشاشة الكامل
-        tg.MainButton.textColor = '#ffffff';
-        tg.MainButton.color = '#2e7d32'; // لون الزر الرئيسي (أخضر)
-
-        let cart = [];
+        tg.expand(); 
+        
+        let cart = {};
         let total = 0;
 
-        function addToCart(name, price) {
-            cart.push({name: name, price: price});
-            total += price;
-            
-            // تحديث نص السلة
-            document.getElementById('cartSummary').innerText = `عدد المنتجات: ${cart.length} | الإجمالي: ${total.toLocaleString()} د.ع`;
+        // 1. استرجاع البيانات من التخزين السحابي عند الفتح
+        tg.CloudStorage.getItem('userData', function(err, value) {
+            if (!err && value) {
+                let data = JSON.parse(value);
+                document.getElementById('fullName').value = data.name || '';
+                document.getElementById('phone').value = data.phone || '';
+                document.getElementById('address').value = data.address || '';
+            }
+        });
 
-            // إظهار زر التليجرام السفلي عند إضافة أول منتج
-            if(cart.length > 0) {
-                tg.MainButton.text = `تأكيد وإرسال الطلب (${total.toLocaleString()} د.ع)`;
+        // 2. حفظ البيانات سحابياً (تعمل تلقائياً عند الكتابة)
+        function saveData() {
+            let data = {
+                name: document.getElementById('fullName').value,
+                phone: document.getElementById('phone').value,
+                address: document.getElementById('address').value
+            };
+            tg.CloudStorage.setItem('userData', JSON.stringify(data));
+        }
+
+        // 3. نظام الاهتزاز مع السلة
+        function updateCart(name, price, change) {
+            tg.HapticFeedback.impactOccurred('light'); // اهتزاز خفيف
+            
+            if (!cart[name]) cart[name] = { price: price, qty: 0 };
+            cart[name].qty += change;
+            if (cart[name].qty < 0) cart[name].qty = 0;
+            
+            document.getElementById('qty-' + name).innerText = cart[name].qty;
+            if (cart[name].qty === 0) delete cart[name];
+            
+            updateMainButton();
+        }
+
+        function updateMainButton() {
+            total = 0;
+            for (let key in cart) total += cart[key].price * cart[key].qty;
+            
+            if (total > 0) {
+                tg.MainButton.text = `تأكيد الطلب | ${total.toLocaleString()} د.ع`;
                 tg.MainButton.show();
+            } else {
+                tg.MainButton.hide();
             }
         }
 
-        // الحدث عند الضغط على زر "تأكيد الطلب" الخاص بالتليجرام
-        Telegram.WebApp.onEvent('mainButtonClicked', function(){
-            let name = document.getElementById('fullName').value.trim();
-            let phone = document.getElementById('phone').value.trim();
-            let address = document.getElementById('address').value.trim();
+        // 4. الماسح الضوئي (QR Scanner)
+        function scanQR() {
+            tg.HapticFeedback.impactOccurred('medium');
+            tg.showScanQrPopup({text: "وجّه الكاميرا نحو باركود الملزمة"}, function(text) {
+                tg.showAlert("تم قراءة الكود: " + text);
+                return true; 
+            });
+        }
 
-            // التحقق من إدخال البيانات
+        // 5. سحب الموقع الجغرافي (GPS)
+        function getLocation() {
+            tg.HapticFeedback.impactOccurred('medium');
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(function(position) {
+                    let locText = `احداثيات: ${position.coords.latitude.toFixed(4)}, ${position.coords.longitude.toFixed(4)}`;
+                    document.getElementById('address').value = locText;
+                    saveData();
+                    tg.showAlert("تم سحب الموقع بنجاح!");
+                }, function() {
+                    tg.showAlert("يرجى تفعيل صلاحية الموقع من إعدادات الهاتف.");
+                });
+            }
+        }
+
+        // إرسال الطلب
+        Telegram.WebApp.onEvent('mainButtonClicked', function(){
+            tg.HapticFeedback.notificationOccurred('success'); // اهتزاز نجاح قوي
+            
+            let name = document.getElementById('fullName').value;
+            let phone = document.getElementById('phone').value;
+            let address = document.getElementById('address').value;
+
             if(!name || !phone || !address) {
-                tg.showAlert("رجاءً املأ كل معلومات التوصيل (الاسم، الرقم، العنوان) قبل تأكيد الطلب!");
+                tg.HapticFeedback.notificationOccurred('error');
+                tg.showAlert("رجاءً املأ كل المعلومات!");
                 return;
             }
 
-            // تجهيز البيانات لإرسالها للبوت (كـ JSON)
-            let orderData = {
-                customer_name: name,
-                customer_phone: phone,
-                customer_address: address,
-                items: cart,
-                total_price: total
-            };
+            let itemsArray = [];
+            for (let key in cart) itemsArray.push({ name: `${cart[key].qty}x ${key}`, price: cart[key].price * cart[key].qty });
 
-            // إرسال البيانات للبوت وإغلاق الواجهة
-            tg.sendData(JSON.stringify(orderData)); 
+            tg.sendData(JSON.stringify({ customer_name: name, customer_phone: phone, customer_address: address, items: itemsArray, total_price: total })); 
         });
     </script>
 </body>
