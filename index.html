@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>متجر باينري - Binary Store</title>
+    <!-- مكتبة تليجرام الرسمية لربط الواجهة بالبوت -->
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    
+    <style>
+        :root {
+            --bg-color: var(--tg-theme-bg-color, #f4f4f9);
+            --text-color: var(--tg-theme-text-color, #222);
+            --btn-color: var(--tg-theme-button-color, #0088cc);
+            --btn-text: var(--tg-theme-button-text-color, #fff);
+            --card-bg: var(--tg-theme-secondary-bg-color, #ffffff);
+        }
+        body { 
+            font-family: system-ui, -apple-system, sans-serif; 
+            background: var(--bg-color); 
+            color: var(--text-color); 
+            margin: 0; 
+            padding: 15px; 
+            padding-bottom: 80px; /* مسافة للزر السفلي */
+        }
+        .header { text-align: center; margin-bottom: 20px; }
+        .cart-summary { background: #e3f2fd; color: #0d47a1; padding: 12px; border-radius: 10px; text-align: center; font-weight: bold; margin-bottom: 20px; border: 1px solid #bbdefb; }
+        
+        .product-card { 
+            background: var(--card-bg); 
+            border-radius: 15px; 
+            padding: 15px; 
+            margin-bottom: 15px; 
+            box-shadow: 0 4px 8px rgba(0,0,0,0.05); 
+            display: flex; 
+            align-items: center; 
+            justify-content: space-between;
+            border: 1px solid rgba(0,0,0,0.05);
+        }
+        .product-info h3 { margin: 0 0 5px 0; font-size: 16px; font-weight: 700;}
+        .product-info p { margin: 0; color: #2e7d32; font-weight: bold; font-size: 14px;}
+        .btn-add { background: var(--btn-color); color: var(--btn-text); border: none; padding: 8px 16px; border-radius: 20px; cursor: pointer; font-weight: bold; transition: 0.2s;}
+        .btn-add:active { opacity: 0.7; transform: scale(0.95); }
+        
+        .form-section { background: var(--card-bg); padding: 15px; border-radius: 15px; margin-top: 25px; box-shadow: 0 4px 8px rgba(0,0,0,0.05); }
+        .form-section h3 { margin-top: 0; font-size: 16px; border-bottom: 2px solid #f0f0f0; padding-bottom: 10px;}
+        input, select { 
+            width: 100%; 
+            padding: 12px; 
+            margin-bottom: 12px; 
+            border: 1px solid #ddd; 
+            border-radius: 10px; 
+            box-sizing: border-box; 
+            font-family: inherit;
+            background: var(--bg-color);
+            color: var(--text-color);
+        }
+        input:focus { outline: none; border-color: var(--btn-color); }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h2>🛒 متجر باينري - Binary Store</h2>
+        <p>اختر المنتجات واملأ بياناتك للتوصيل</p>
+    </div>
+
+    <div class="cart-summary" id="cartSummary">
+        السلة فارغة - الإجمالي: 0 د.ع
+    </div>
+
+    <!-- قائمة المنتجات (تقدر تضيف وتعدل عليها براحتك) -->
+    <div class="product-card">
+        <div class="product-info">
+            <h3>تصميم لوكو احترافي</h3>
+            <p>25,000 د.ع</p>
+        </div>
+        <button class="btn-add" onclick="addToCart('تصميم لوكو احترافي', 25000)">إضافة</button>
+    </div>
+
+    <div class="product-card">
+        <div class="product-info">
+            <h3>طباعة ستيكرات (100 قطعة)</h3>
+            <p>15,000 د.ع</p>
+        </div>
+        <button class="btn-add" onclick="addToCart('طباعة ستيكرات (100 قطعة)', 15000)">إضافة</button>
+    </div>
+
+    <!-- نموذج معلومات الزبون -->
+    <div class="form-section">
+        <h3>📍 معلومات التوصيل:</h3>
+        <input type="text" id="fullName" placeholder="الاسم الكامل" required>
+        <input type="tel" id="phone" placeholder="رقم الهاتف (مثال: 077...)" required>
+        <input type="text" id="address" placeholder="المحافظة - المنطقة - أقرب نقطة دالة" required>
+    </div>
+
+    <script>
+        // تهيئة مكتبة تليجرام
+        let tg = window.Telegram.WebApp;
+        tg.expand(); // يخلي الواجهة تفتح بحجم الشاشة الكامل
+        tg.MainButton.textColor = '#ffffff';
+        tg.MainButton.color = '#2e7d32'; // لون الزر الرئيسي (أخضر)
+
+        let cart = [];
+        let total = 0;
+
+        function addToCart(name, price) {
+            cart.push({name: name, price: price});
+            total += price;
+            
+            // تحديث نص السلة
+            document.getElementById('cartSummary').innerText = `عدد المنتجات: ${cart.length} | الإجمالي: ${total.toLocaleString()} د.ع`;
+
+            // إظهار زر التليجرام السفلي عند إضافة أول منتج
+            if(cart.length > 0) {
+                tg.MainButton.text = `تأكيد وإرسال الطلب (${total.toLocaleString()} د.ع)`;
+                tg.MainButton.show();
+            }
+        }
+
+        // الحدث عند الضغط على زر "تأكيد الطلب" الخاص بالتليجرام
+        Telegram.WebApp.onEvent('mainButtonClicked', function(){
+            let name = document.getElementById('fullName').value.trim();
+            let phone = document.getElementById('phone').value.trim();
+            let address = document.getElementById('address').value.trim();
+
+            // التحقق من إدخال البيانات
+            if(!name || !phone || !address) {
+                tg.showAlert("رجاءً املأ كل معلومات التوصيل (الاسم، الرقم، العنوان) قبل تأكيد الطلب!");
+                return;
+            }
+
+            // تجهيز البيانات لإرسالها للبوت (كـ JSON)
+            let orderData = {
+                customer_name: name,
+                customer_phone: phone,
+                customer_address: address,
+                items: cart,
+                total_price: total
+            };
+
+            // إرسال البيانات للبوت وإغلاق الواجهة
+            tg.sendData(JSON.stringify(orderData)); 
+        });
+    </script>
+</body>
+</html>
