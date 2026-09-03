@@ -3,439 +3,280 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>مكتبة ميم - Neon Edition</title>
+    <title>مكتبة ميم</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        :root {
-            --bg-color: #0b0f19;
-            --card-bg: #131c2e;
-            --neon-glow: #00f0ff;
-            --neon-pink: #ff007f;
-            --text-main: #ffffff;
-            --text-muted: #94a3b8;
-            --success: #10b981;
-            --accent: #6366f1;
-        }
-        body { 
-            font-family: system-ui, -apple-system, sans-serif; 
-            background: var(--bg-color); 
-            color: var(--text-main); 
-            margin: 0; 
-            padding-bottom: 90px; 
-            overflow-x: hidden;
-        }
+        :root { --bg: #0b0f19; --card: #131c2e; --neon: #00f0ff; --text: #fff; --success: #10b981; --accent: #ff007f; }
+        body { font-family: system-ui, sans-serif; background: var(--bg); color: var(--text); margin: 0; padding-bottom: 90px; }
         
-        /* شاشة الترحيب */
-        .splash-screen {
-            background: radial-gradient(circle, #1e293b 0%, #0b0f19 100%);
-            padding: 30px 20px;
-            text-align: center;
-            border-bottom: 2px solid rgba(0, 240, 255, 0.2);
-            box-shadow: 0 0 20px rgba(0, 240, 255, 0.1);
-        }
-        .logo-container {
-            width: 90px;
-            height: 90px;
-            margin: 0 auto 15px auto;
-            border-radius: 50%;
-            background: #1e293b;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border: 2px solid var(--neon-glow);
-            box-shadow: 0 0 15px var(--neon-glow);
-            font-size: 36px;
-        }
-        .splash-screen h1 { margin: 0; font-size: 24px; color: var(--neon-glow); text-shadow: 0 0 10px rgba(0,240,255,0.5); }
-        .splash-screen p { margin: 5px 0 0 0; color: var(--text-muted); font-size: 13px; }
-
-        /* شريط العلوي وأزرار القائمة والسلة */
-        .top-bar {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 15px 20px;
-            background: var(--card-bg);
-            border-bottom: 1px solid rgba(255,255,255,0.05);
-            position: sticky;
-            top: 0;
-            z-index: 100;
-        }
-        .menu-btn {
-            background: none;
-            border: none;
-            color: var(--neon-glow);
-            font-size: 24px;
-            cursor: pointer;
-            text-shadow: 0 0 8px var(--neon-glow);
-        }
-        .search-bar {
-            flex-grow: 1;
-            margin: 0 15px;
-            padding: 10px 15px;
-            border-radius: 20px;
-            border: 1px solid rgba(0, 240, 255, 0.3);
-            background: rgba(255,255,255,0.05);
-            color: white;
-            outline: none;
-            font-family: inherit;
-        }
-        .search-bar:focus { border-color: var(--neon-glow); box-shadow: 0 0 10px rgba(0,240,255,0.3); }
-
-        /* الأقسام الرئيسية (الابتدائية، المتوسطة، الإعدادية) */
-        .section-container { padding: 15px; }
-        .category-group {
-            background: var(--card-bg);
-            border-radius: 15px;
-            margin-bottom: 15px;
-            border: 1px solid rgba(255,255,255,0.05);
-            overflow: hidden;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
-        }
-        .cat-header {
-            padding: 15px;
-            background: linear-gradient(90deg, #1e293b, #131c2e);
-            font-weight: bold;
-            font-size: 16px;
-            color: var(--neon-glow);
-            display: flex;
-            justify-content: space-between;
-            cursor: pointer;
-        }
-        .grades-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
-            padding: 12px;
-            display: none; /* مخفية تفتح عند الضغط */
-        }
-        .category-group.open .grades-grid { display: grid; }
-
-        .grade-card {
-            background: rgba(255,255,255,0.03);
-            border: 1px solid rgba(255,255,255,0.08);
-            padding: 12px;
-            border-radius: 10px;
-            text-align: center;
-            cursor: pointer;
-            transition: 0.2s;
-        }
-        .grade-card:active { transform: scale(0.97); background: rgba(0,240,255,0.1); }
-        .grade-card h4 { margin: 0 0 5px 0; font-size: 14px; color: white; }
-        .grade-card span { font-size: 11px; color: var(--text-muted); }
-
-        /* نافذة المواد (Modal) */
-        .modal {
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.8);
-            backdrop-filter: blur(5px);
-            display: none;
-            justify-content: center;
-            align-items: flex-end;
-            z-index: 1000;
-        }
-        .modal-content {
-            background: var(--card-bg);
-            width: 100%;
-            max-height: 80vh;
-            border-radius: 20px 20px 0 0;
-            padding: 20px;
-            box-sizing: border-box;
-            overflow-y: auto;
-            border-top: 2px solid var(--neon-pink);
-            box-shadow: 0 -5px 25px rgba(255,0,127,0.2);
-        }
-        .subject-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            background: rgba(255,255,255,0.03);
-            padding: 10px 15px;
-            border-radius: 10px;
-            margin-bottom: 10px;
-            border: 1px solid rgba(255,255,255,0.05);
-        }
-        .btn-add {
-            background: linear-gradient(45deg, var(--accent), var(--neon-pink));
-            color: white; border: none; padding: 6px 14px;
-            border-radius: 8px; cursor: pointer; font-weight: bold;
-        }
-
-        /* قائمة السلة الجانبية (Drawer) */
-        .drawer {
-            position: fixed;
-            top: 0; right: -100%; width: 85%; height: 100%;
-            background: #0f172a;
-            z-index: 2000;
-            box-shadow: -5px 0 25px rgba(0,0,0,0.5);
-            transition: 0.3s ease;
-            box-sizing: border-box;
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-            border-left: 2px solid var(--neon-glow);
-        }
-        .drawer.open { right: 0; }
-        .drawer-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 15px; }
-        .close-drawer { background: none; border: none; color: white; font-size: 22px; cursor: pointer; }
+        .header { text-align: center; padding: 20px; border-bottom: 1px solid rgba(0,240,255,0.2); box-shadow: 0 0 15px rgba(0,240,255,0.1); }
+        .header h2 { margin: 0; color: var(--neon); text-shadow: 0 0 10px rgba(0,240,255,0.4); }
         
-        .cart-items { flex-grow: 1; overflow-y: auto; margin-top: 15px; }
-        .cart-item { display: flex; justify-content: space-between; background: rgba(255,255,255,0.03); padding: 10px; border-radius: 8px; margin-bottom: 8px; font-size: 13px; }
+        .container { padding: 15px; }
+        .main-btn { background: var(--card); border: 1px solid var(--neon); color: var(--text); padding: 18px; width: 100%; border-radius: 12px; font-size: 16px; font-weight: bold; margin-bottom: 15px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; box-sizing: border-box; transition: 0.2s;}
+        .main-btn:active { transform: scale(0.97); background: rgba(0,240,255,0.1); }
         
-        .checkout-form input {
-            width: 100%; padding: 12px; margin-bottom: 10px;
-            border-radius: 8px; border: 1px solid rgba(255,255,255,0.1);
-            background: rgba(255,255,255,0.05); color: white; box-sizing: border-box;
-        }
+        .grid-list { display: grid; grid-template-columns: 1fr; gap: 10px; }
+        .item-card { background: rgba(255,255,255,0.03); padding: 15px; border-radius: 10px; display: flex; justify-content: space-between; align-items: center; border: 1px solid rgba(255,255,255,0.08); }
+        .action-btn { background: var(--neon); color: #000; border: none; padding: 8px 15px; border-radius: 8px; font-weight: bold; cursor: pointer; }
+        
+        .modal { position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); display:none; justify-content:center; align-items:center; z-index:100; backdrop-filter: blur(5px); }
+        .modal-box { background: var(--card); padding: 20px; border-radius: 15px; width: 85%; border: 1px solid var(--neon); }
+        
+        .nav-bar { display: none; padding: 12px 15px; background: rgba(0,240,255,0.1); margin-bottom: 15px; cursor: pointer; color: var(--neon); font-weight: bold; text-align: center; border-radius: 10px; }
+        
+        .cart-bar { position: fixed; bottom: 0; left: 0; width: 100%; background: var(--card); padding: 15px; box-sizing: border-box; border-top: 1px solid var(--neon); display: flex; justify-content: space-between; align-items: center; z-index: 50; }
+        .checkout-box { display: none; position: fixed; top:0; left:0; width:100%; height:100%; background: var(--bg); z-index:200; padding: 20px; box-sizing: border-box; overflow-y: auto; }
+        .checkout-box input { width: 100%; padding: 12px; margin-bottom: 12px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.05); color: white; box-sizing: border-box; outline: none;}
+        .checkout-box input:focus { border-color: var(--neon); }
+        .promo-container { display: flex; gap: 10px; margin-bottom: 15px; }
     </style>
 </head>
 <body>
 
-    <!-- شاشة الترحيب والبصريات -->
-    <div class="splash-screen">
-        <div class="logo-container">📚</div>
-        <h1>مكتبة ميم</h1>
-        <p>نظام الطلب الذكي المتطور - الطبعة الخاصة</p>
+    <div class="header"><h2>📚 مكتبة ميم</h2><p>النظام الذكي للطلبات</p></div>
+    
+    <div class="container" id="contentArea">
+        <div id="view-main">
+            <button class="main-btn" onclick="openSection('books')">📘 الكتب المدرسية <span style="color:var(--neon);">🡐</span></button>
+            <button class="main-btn" onclick="openSection('malazim')">📙 الملازم الدراسية <span style="color:var(--neon);">🡐</span></button>
+        </div>
+    </div>
+    <div class="container" style="padding-top:0;">
+        <div class="nav-bar" id="navBar" onclick="goBack()">🔙 عودة للقائمة الرئيسية</div>
     </div>
 
-    <!-- شريط علوي مع زر السلة (3 خطوط) والبحث -->
-    <div class="top-bar">
-        <input type="text" id="searchInput" class="search-bar" placeholder="🔍 بحث عن مادة أو صف..." onkeyup="globalSearch()">
-        <button class="menu-btn" onclick="toggleDrawer()">☰</button>
+    <!-- نافذة المدرسين -->
+    <div class="modal" id="teacherModal">
+        <div class="modal-box">
+            <h3 id="teacherModalTitle" style="margin-top:0; color:var(--neon);">اختر المدرس</h3>
+            <div class="grid-list" id="teachersList"></div>
+            <button class="action-btn" style="width:100%; margin-top:15px; background:#444; color:white;" onclick="closeModal()">إلغاء</button>
+        </div>
     </div>
 
-    <!-- الأقسام الثلاثة الرئيسية (الابتدائية، المتوسطة، الإعدادية) -->
-    <div class="section-container" id="mainSections">
+    <!-- شريط السلة -->
+    <div class="cart-bar" id="cartBar" style="display:none;">
+        <div id="cartTotalText">الإجمالي: 0 د.ع</div>
+        <button class="action-btn" onclick="openCheckout()">إتمام الطلب 🛒</button>
+    </div>
+
+    <!-- صفحة الدفع -->
+    <div class="checkout-box" id="checkoutView">
+        <h2 style="color:var(--neon); margin-top:0;">فاتورة الطلب</h2>
+        <div id="checkoutCartItems" style="margin-bottom:15px; font-size:14px; color:#aaa; max-height:150px; overflow-y:auto; background: rgba(255,255,255,0.02); padding: 10px; border-radius: 8px;"></div>
         
-        <!-- الابتدائية -->
-        <div class="category-group" id="group-primary">
-            <div class="cat-header" onclick="toggleGroup('group-primary')">
-                <span>📖 المرحلة الابتدائية</span>
-                <span>▼</span>
-            </div>
-            <div class="grades-grid">
-                <div class="grade-card" onclick="openGrade('الأول الابتدائي')"><h4>الأول الابتدائي</h4><span>6 مواد أساسية</span></div>
-                <div class="grade-card" onclick="openGrade('الثاني الابتدائي')"><h4>الثاني الابتدائي</h4><span>6 مواد أساسية</span></div>
-                <div class="grade-card" onclick="openGrade('الثالث الابتدائي')"><h4>الثالث الابتدائي</h4><span>6 مواد أساسية</span></div>
-                <div class="grade-card" onclick="openGrade('الرابع الابتدائي')"><h4>الرابع الابتدائي</h4><span>6 مواد أساسية</span></div>
-                <div class="grade-card" onclick="openGrade('الخامس الابتدائي')"><h4>الخامس الابتدائي</h4><span>6 مواد أساسية</span></div>
-                <div class="grade-card" onclick="openGrade('السادس الابتدائي')"><h4>السادس الابتدائي</h4><span>6 مواد أساسية</span></div>
-            </div>
+        <!-- نظام الكوبونات -->
+        <div class="promo-container">
+            <input type="text" id="promoCode" placeholder="كود الخصم (إن وجد)" style="margin:0;">
+            <button class="action-btn" onclick="applyPromo()" style="white-space: nowrap;">تفعيل</button>
         </div>
 
-        <!-- المتوسطة -->
-        <div class="category-group" id="group-intermediate">
-            <div class="cat-header" onclick="toggleGroup('group-intermediate')">
-                <span>📘 المرحلة المتوسطة</span>
-                <span>▼</span>
-            </div>
-            <div class="grades-grid">
-                <div class="grade-card" onclick="openGrade('الأول المتوسط')"><h4>الأول المتوسط</h4><span>5 مواد أساسية</span></div>
-                <div class="grade-card" onclick="openGrade('الثاني المتوسط')"><h4>الثاني المتوسط</h4><span>5 مواد أساسية</span></div>
-                <div class="grade-card" onclick="openGrade('الثالث المتوسط')"><h4>الثالث المتوسط</h4><span>5 مواد أساسية</span></div>
-            </div>
-        </div>
-
-        <!-- الإعدادية -->
-        <div class="category-group" id="group-secondary">
-            <div class="cat-header" onclick="toggleGroup('group-secondary')">
-                <span>📙 المرحلة الإعدادية</span>
-                <span>▼</span>
-            </div>
-            <div class="grades-grid">
-                <div class="grade-card" onclick="openGrade('الرابع الإعدادي')"><h4>الرابع الإعدادي</h4><span>5 مواد أساسية</span></div>
-                <div class="grade-card" onclick="openGrade('الخامس الإعدادي')"><h4>الخامس الإعدادي</h4><span>5 مواد أساسية</span></div>
-                <div class="grade-card" onclick="openGrade('السادس الإعدادي')"><h4>السادس الإعدادي</h4><span>5 مواد أساسية</span></div>
-            </div>
-        </div>
-
-    </div>
-
-    <!-- نافذة منبثقة لاختيار مواد الصف -->
-    <div class="modal" id="gradeModal" onclick="closeModal(event)">
-        <div class="modal-content" id="modalContent">
-            <h3 id="modalTitle" style="color: var(--neon-glow); margin-top:0;"></h3>
-            <div id="subjectsList"></div>
-        </div>
-    </div>
-
-    <!-- قائمة السلة الجانبية (Drawer) -->
-    <div class="drawer" id="cartDrawer">
-        <div class="drawer-header">
-            <h3 style="margin:0; color:var(--neon-glow);">🛒 سلة الطلبات</h3>
-            <button class="close-drawer" onclick="toggleDrawer()">✕</button>
-        </div>
-        <div class="cart-items" id="cartItemsContainer">
-            <p style="text-align:center; color: var(--text-muted); margin-top:20px;">السلة فارغة حالياً</p>
-        </div>
-        <div class="checkout-form">
-            <h4 style="margin:10px 0; font-size:14px;">📍 بيانات التوصيل:</h4>
-            <input type="text" id="fullName" placeholder="الاسم الكامل">
-            <input type="tel" id="phone" placeholder="رقم الهاتف">
-            <input type="text" id="address" placeholder="العنوان أو موقع الـ GPS">
-        </div>
+        <input type="text" id="custName" placeholder="الاسم الكامل">
+        <input type="tel" id="custPhone" placeholder="رقم الهاتف">
+        <input type="text" id="custAddress" placeholder="المحافظة - المنطقة - أقرب نقطة دالة">
+        
+        <button class="main-btn" style="justify-content:center; margin-top:10px; background:var(--success); color:black; border:none;" onclick="submitOrder()">تأكيد الطلب ✅</button>
+        <button class="main-btn" style="justify-content:center; margin-top:5px; background:rgba(255,255,255,0.1); border:none;" onclick="closeCheckout()">رجوع للمتجر</button>
     </div>
 
     <script>
         let tg = window.Telegram.WebApp;
         tg.expand();
-
+        tg.ready();
+        
+        let currentMode = ''; 
         let cart = {};
+        let totalCartPrice = 0;
+        let finalPrice = 0;
+        let discountApplied = false;
+        
+        const dataConfig = {
+            stages: [
+                { id: 'primary', name: 'المرحلة الابتدائية' },
+                { id: 'middle', name: 'المرحلة المتوسطة' },
+                { id: 'high', name: 'المرحلة الإعدادية' }
+            ],
+            grades: {
+                primary: ['الأول الابتدائي', 'الثاني الابتدائي', 'الثالث الابتدائي', 'الرابع الابتدائي', 'الخامس الابتدائي', 'السادس الابتدائي'],
+                middle: ['الأول المتوسط', 'الثاني المتوسط', 'الثالث المتوسط'],
+                high: ['الرابع الإعدادي', 'الخامس الإعدادي', 'السادس الإعدادي']
+            },
+            subjectsBase: ['الرياضيات', 'العلوم', 'اللغة الإنجليزية', 'اللغة العربية', 'التربية الإسلامية']
+        };
 
-        // فتح/غلق الأقسام الرئيسية
-        function toggleGroup(groupId) {
+        const teachers = ['أ. حيدر وليد', 'أ. حيدر عبد الأئمة'];
+        let selectedSubjectTemp = '';
+        let selectedGradeTemp = '';
+
+        function renderHTML(html) { document.getElementById('contentArea').innerHTML = html; }
+
+        function openSection(mode) {
             tg.HapticFeedback.impactOccurred('light');
-            let el = document.getElementById(groupId);
-            el.classList.toggle('open');
+            currentMode = mode;
+            document.getElementById('navBar').style.display = 'block';
+            let html = '<div class="grid-list">';
+            dataConfig.stages.forEach(s => {
+                html += `<button class="main-btn" onclick="openStage('${s.id}')">${s.name} <span style="color:var(--text-muted);">🡐</span></button>`;
+            });
+            html += '</div>';
+            renderHTML(html);
         }
 
-        // فتح نافذة الصف واختيار المواد الأساسية (رياضيات، علوم/فيزياء، إنجليزي، عربي، إسلامية)
-        function openGrade(gradeName) {
-            tg.HapticFeedback.impactOccurred('medium');
-            document.getElementById('modalTitle').innerText = `ملازم ${gradeName}`;
+        function openStage(stageId) {
+            tg.HapticFeedback.impactOccurred('light');
+            let html = '<div class="grid-list">';
+            let availableGrades = dataConfig.grades[stageId];
             
-            let subjects = [
-                { name: 'الرياضيات', price: 6000 },
-                { name: 'اللغة العربية', price: 5000 },
-                { name: 'اللغة الإنجليزية', price: 5000 },
-                { name: 'العلوم / الفيزياء', price: 6000 },
-                { name: 'التربية الإسلامية', price: 4000 }
-            ];
-
-            let html = '';
-            subjects.forEach(sub => {
-                let fullNameItem = `${gradeName} - ${sub.name}`;
-                html += `
-                    <div class="subject-row">
-                        <div>
-                            <div style="font-weight:bold; font-size:14px;">${sub.name}</div>
-                            <div style="font-size:12px; color:var(--success);">${sub.price.toLocaleString()} د.ع</div>
-                        </div>
-                        <button class="btn-add" onclick="addToCart('${fullNameItem}', ${sub.price})">إضافة للسلة</button>
-                    </div>
-                `;
-            });
-
-            document.getElementById('subjectsList').innerHTML = html;
-            document.getElementById('gradeModal').style.display = 'flex';
-        }
-
-        function closeModal(e) {
-            if (e.target.id === 'gradeModal') {
-                document.getElementById('gradeModal').style.display = 'none';
+            if(currentMode === 'malazim' && stageId === 'primary') {
+                availableGrades = ['الرابع الابتدائي', 'الخامس الابتدائي', 'السادس الابتدائي'];
             }
+
+            availableGrades.forEach(g => {
+                html += `<div class="item-card" onclick="openSubjects('${g}', '${stageId}')">
+                            <b style="font-size:15px;">${g}</b>
+                            <span style="color:var(--neon); font-size:12px; font-weight:bold;">عرض المواد 🡐</span>
+                         </div>`;
+            });
+            html += '</div>';
+            renderHTML(html);
         }
 
-        // فتح/غلق القائمة الجانبية (السلة) عبر زر الـ ☰
-        function toggleDrawer() {
-            tg.HapticFeedback.impactOccurred('light');
-            let drawer = document.getElementById('cartDrawer');
-            drawer.classList.toggle('open');
+        function openSubjects(grade, stageId) {
+            tg.HapticFeedback.impactOccurred('medium');
+            let html = '<div class="grid-list">';
+            let subs = [...dataConfig.subjectsBase];
+            
+            if(stageId !== 'high') subs.push('الاجتماعيات');
+
+            if(currentMode === 'books') {
+                html += `<div class="item-card" style="border-color:var(--success); background:rgba(16, 185, 129, 0.05);">
+                            <div><b style="color:var(--success);">باكج دراسي كامل</b><br><span style="font-size:12px; color:#aaa;">جميع المواد المنهجية</span></div>
+                            <button class="action-btn" style="background:var(--success); color:white;" onclick="addToCart('${grade} - باكج كامل', 25000)">25,000 د.ع</button>
+                         </div>`;
+                         
+                subs.forEach(s => {
+                    html += `<div class="item-card">
+                                <b>كتاب ${s}</b>
+                                <button class="action-btn" onclick="addToCart('${grade} - كتاب ${s}', 5000)">5,000 د.ع</button>
+                             </div>`;
+                });
+            } else {
+                subs.forEach(s => {
+                    html += `<div class="item-card" onclick="showTeachers('${grade}', '${s}')">
+                                <b>ملزمة ${s}</b>
+                                <span style="color:var(--neon); font-size:12px; border: 1px solid var(--neon); padding: 4px 8px; border-radius: 6px;">اختر المدرس</span>
+                             </div>`;
+                });
+            }
+            html += '</div>';
+            renderHTML(html);
         }
 
-        // إضافة منتج للسلة مع اهتزاز تفاعلي
-        function addToCart(itemName, price) {
+        function showTeachers(grade, subject) {
+            selectedGradeTemp = grade;
+            selectedSubjectTemp = subject;
+            document.getElementById('teacherModalTitle').innerText = `مدرسي ${subject}`;
+            let html = '';
+            teachers.forEach(t => {
+                html += `<div class="item-card" style="margin-bottom:8px;">
+                            <b>${t}</b>
+                            <button class="action-btn" onclick="addMalzama('${t}')">إضافة للسلة</button>
+                         </div>`;
+            });
+            document.getElementById('teachersList').innerHTML = html;
+            document.getElementById('teacherModal').style.display = 'flex';
+        }
+
+        function addMalzama(teacherName) {
+            let itemName = `${selectedGradeTemp} - ملزمة ${selectedSubjectTemp} (${teacherName})`;
+            addToCart(itemName, 10000); 
+            closeModal();
+        }
+
+        function closeModal() { document.getElementById('teacherModal').style.display = 'none'; }
+
+        function addToCart(name, price) {
             tg.HapticFeedback.notificationOccurred('success');
-            if (!cart[itemName]) {
-                cart[itemName] = { price: price, qty: 1 };
-            } else {
-                cart[itemName].qty += 1;
-            }
-            updateCartUI();
-            tg.showAlert(`تمت إضافة "${itemName}" بنجاح إلى السلة!`);
+            if(!cart[name]) cart[name] = { price: price, qty: 1 };
+            else cart[name].qty++;
+            updateCartBar();
+            tg.showAlert(`✅ تمت إضافة ${name} للسلة`);
         }
 
-        // تحديث محتوى السلة وزر التليجرام الرئيسي
-        function updateCartUI() {
-            let container = document.getElementById('cartItemsContainer');
-            let total = 0;
-            let count = 0;
+        function updateCartBar() {
+            totalCartPrice = 0;
+            for(let k in cart) totalCartPrice += cart[k].price * cart[k].qty;
+            finalPrice = totalCartPrice;
+            if(discountApplied) finalPrice = totalCartPrice * 0.9;
+            
+            if(totalCartPrice > 0) {
+                document.getElementById('cartTotalText').innerHTML = `الإجمالي: <b style="color:var(--neon);">${finalPrice.toLocaleString()} د.ع</b>`;
+                document.getElementById('cartBar').style.display = 'flex';
+            }
+        }
+
+        function applyPromo() {
+            let code = document.getElementById('promoCode').value.toUpperCase().trim();
+            if (code === 'ALI2026') {
+                tg.HapticFeedback.notificationOccurred('success');
+                discountApplied = true;
+                updateCartBar();
+                updateCheckoutCart();
+                tg.showAlert("🎉 تم تفعيل الخصم 10% بنجاح!");
+            } else {
+                tg.HapticFeedback.notificationOccurred('error');
+                tg.showAlert("❌ الكود غير صحيح أو منتهي الصلاحية.");
+            }
+        }
+
+        function updateCheckoutCart() {
             let html = '';
-
-            for (let name in cart) {
-                let itemTotal = cart[name].price * cart[name].qty;
-                total += itemTotal;
-                count += cart[name].qty;
-                html += `
-                    <div class="cart-item">
-                        <div><b>${name}</b><br>العدد: ${cart[name].qty}</div>
-                        <div style="color:var(--success); font-weight:bold;">${itemTotal.toLocaleString()} د.ع</div>
-                    </div>
-                `;
+            for(let k in cart) html += `<div style="margin-bottom:5px;">▪️ ${cart[k].qty}x ${k} = ${(cart[k].price * cart[k].qty).toLocaleString()} د.ع</div>`;
+            if(discountApplied) {
+                html += `<hr style="border-color:#333;"><div style="color:var(--success);">خصم الكود: -${(totalCartPrice * 0.1).toLocaleString()} د.ع</div>`;
             }
-
-            if (count > 0) {
-                container.innerHTML = html;
-                tg.MainButton.text = `تأكيد وإرسال الطلب (${total.toLocaleString()} د.ع)`;
-                tg.MainButton.show();
-            } else {
-                container.innerHTML = '<p style="text-align:center; color: var(--text-muted); margin-top:20px;">السلة فارغة حالياً</p>';
-                tg.MainButton.hide();
-            }
+            html += `<h3 style="color:white; margin-bottom:0;">المطلوب: ${finalPrice.toLocaleString()} د.ع</h3>`;
+            document.getElementById('checkoutCartItems').innerHTML = html;
         }
 
-        // محرك البحث الشامل لكل الصفوف والمواد
-        function globalSearch() {
-            let query = document.getElementById('searchInput').value.toLowerCase();
-            let groups = document.querySelectorAll('.category-group');
-
-            groups.forEach(group => {
-                let cards = group.querySelectorAll('.grade-card');
-                let groupHasMatch = false;
-
-                cards.forEach(card => {
-                    let title = card.querySelector('h4').innerText.toLowerCase();
-                    if (title.includes(query) || query === '') {
-                        card.style.display = 'block';
-                        groupHasMatch = true;
-                    } else {
-                        card.style.display = 'none';
-                    }
-                });
-
-                if (groupHasMatch) {
-                    group.style.display = 'block';
-                    if (query !== '') group.classList.add('open');
-                } else {
-                    group.style.display = 'none';
-                }
-            });
+        function openCheckout() {
+            updateCheckoutCart();
+            document.getElementById('checkoutView').style.display = 'block';
         }
 
-        // إرسال الطلب عبر Telegram WebApp Data
-        Telegram.WebApp.onEvent('mainButtonClicked', function() {
-            tg.HapticFeedback.impactOccurred('heavy');
-            let name = document.getElementById('fullName').value.trim();
-            let phone = document.getElementById('phone').value.trim();
-            let address = document.getElementById('address').value.trim();
+        function closeCheckout() { document.getElementById('checkoutView').style.display = 'none'; }
 
-            if (!name || !phone || !address) {
-                tg.showAlert("يرجى ملء بيانات التوصيل (الاسم، الرقم، العنوان) داخل قائمة السلة قبل الإرسال!");
-                toggleDrawer();
-                return;
+        function goBack() {
+            tg.HapticFeedback.impactOccurred('light');
+            document.getElementById('navBar').style.display = 'none';
+            let html = `
+                <div id="view-main">
+                    <button class="main-btn" onclick="openSection('books')">📘 الكتب المدرسية <span style="color:var(--neon);">🡐</span></button>
+                    <button class="main-btn" onclick="openSection('malazim')">📙 الملازم الدراسية <span style="color:var(--neon);">🡐</span></button>
+                </div>
+            `;
+            renderHTML(html);
+            document.getElementById('cartBar').style.display = 'none';
+            cart = {}; updateCartBar();
+        }
+
+        function submitOrder() {
+            let name = document.getElementById('custName').value.trim();
+            let phone = document.getElementById('custPhone').value.trim();
+            let addr = document.getElementById('custAddress').value.trim();
+            if(!name || !phone || !addr) {
+                tg.HapticFeedback.notificationOccurred('error');
+                return tg.showAlert('⚠️ يرجى ملء كافة معلومات التوصيل!');
             }
-
-            let itemsArray = [];
-            let total = 0;
-            for (let nameKey in cart) {
-                itemsArray.push({
-                    name: `${cart[nameKey].qty}x ${nameKey}`,
-                    price: cart[nameKey].price * cart[nameKey].qty
-                });
-                total += cart[nameKey].price * cart[nameKey].qty;
-            }
-
-            let orderData = {
-                customer_name: name,
-                customer_phone: phone,
-                customer_address: address,
-                items: itemsArray,
-                total_price: total
-            };
-
-            tg.sendData(JSON.stringify(orderData));
-        });
+            
+            tg.HapticFeedback.notificationOccurred('success');
+            let itemsArr = [];
+            for(let k in cart) itemsArr.push({ name: `${cart[k].qty}x ${k}`, price: cart[k].price * cart[k].qty });
+            
+            let data = { customer_name: name, customer_phone: phone, customer_address: addr, items: itemsArr, total_price: finalPrice, discount: discountApplied };
+            tg.sendData(JSON.stringify(data));
+        }
     </script>
 </body>
 </html>
