@@ -3,167 +3,438 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>مكتبة ميم</title>
+    <title>مكتبة ميم - Neon Edition</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        /* التزامن الكامل مع ثيم تليجرام */
         :root {
-            --bg-color: var(--tg-theme-bg-color, #f0f2f5);
-            --card-bg: var(--tg-theme-secondary-bg-color, #ffffff);
-            --primary: var(--tg-theme-button-color, #1877f2);
-            --text-main: var(--tg-theme-text-color, #1c1e21);
-            --text-muted: var(--tg-theme-hint-color, #65676b);
-            --btn-text: var(--tg-theme-button-text-color, #ffffff);
+            --bg-color: #0b0f19;
+            --card-bg: #131c2e;
+            --neon-glow: #00f0ff;
+            --neon-pink: #ff007f;
+            --text-main: #ffffff;
+            --text-muted: #94a3b8;
+            --success: #10b981;
+            --accent: #6366f1;
         }
-        body { font-family: system-ui, -apple-system, sans-serif; background: var(--bg-color); color: var(--text-main); margin: 0; padding-bottom: 80px; transition: all 0.3s ease; }
+        body { 
+            font-family: system-ui, -apple-system, sans-serif; 
+            background: var(--bg-color); 
+            color: var(--text-main); 
+            margin: 0; 
+            padding-bottom: 90px; 
+            overflow-x: hidden;
+        }
         
-        .header { background: var(--card-bg); padding: 15px; text-align: center; border-bottom: 1px solid rgba(128,128,128,0.2); }
-        .header h2 { margin: 0; color: var(--primary); font-size: 22px; }
+        /* شاشة الترحيب */
+        .splash-screen {
+            background: radial-gradient(circle, #1e293b 0%, #0b0f19 100%);
+            padding: 30px 20px;
+            text-align: center;
+            border-bottom: 2px solid rgba(0, 240, 255, 0.2);
+            box-shadow: 0 0 20px rgba(0, 240, 255, 0.1);
+        }
+        .logo-container {
+            width: 90px;
+            height: 90px;
+            margin: 0 auto 15px auto;
+            border-radius: 50%;
+            background: #1e293b;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 2px solid var(--neon-glow);
+            box-shadow: 0 0 15px var(--neon-glow);
+            font-size: 36px;
+        }
+        .splash-screen h1 { margin: 0; font-size: 24px; color: var(--neon-glow); text-shadow: 0 0 10px rgba(0,240,255,0.5); }
+        .splash-screen p { margin: 5px 0 0 0; color: var(--text-muted); font-size: 13px; }
+
+        /* شريط العلوي وأزرار القائمة والسلة */
+        .top-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 20px;
+            background: var(--card-bg);
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        .menu-btn {
+            background: none;
+            border: none;
+            color: var(--neon-glow);
+            font-size: 24px;
+            cursor: pointer;
+            text-shadow: 0 0 8px var(--neon-glow);
+        }
+        .search-bar {
+            flex-grow: 1;
+            margin: 0 15px;
+            padding: 10px 15px;
+            border-radius: 20px;
+            border: 1px solid rgba(0, 240, 255, 0.3);
+            background: rgba(255,255,255,0.05);
+            color: white;
+            outline: none;
+            font-family: inherit;
+        }
+        .search-bar:focus { border-color: var(--neon-glow); box-shadow: 0 0 10px rgba(0,240,255,0.3); }
+
+        /* الأقسام الرئيسية (الابتدائية، المتوسطة، الإعدادية) */
+        .section-container { padding: 15px; }
+        .category-group {
+            background: var(--card-bg);
+            border-radius: 15px;
+            margin-bottom: 15px;
+            border: 1px solid rgba(255,255,255,0.05);
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+        }
+        .cat-header {
+            padding: 15px;
+            background: linear-gradient(90deg, #1e293b, #131c2e);
+            font-weight: bold;
+            font-size: 16px;
+            color: var(--neon-glow);
+            display: flex;
+            justify-content: space-between;
+            cursor: pointer;
+        }
+        .grades-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            padding: 12px;
+            display: none; /* مخفية تفتح عند الضغط */
+        }
+        .category-group.open .grades-grid { display: grid; }
+
+        .grade-card {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.08);
+            padding: 12px;
+            border-radius: 10px;
+            text-align: center;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .grade-card:active { transform: scale(0.97); background: rgba(0,240,255,0.1); }
+        .grade-card h4 { margin: 0 0 5px 0; font-size: 14px; color: white; }
+        .grade-card span { font-size: 11px; color: var(--text-muted); }
+
+        /* نافذة المواد (Modal) */
+        .modal {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.8);
+            backdrop-filter: blur(5px);
+            display: none;
+            justify-content: center;
+            align-items: flex-end;
+            z-index: 1000;
+        }
+        .modal-content {
+            background: var(--card-bg);
+            width: 100%;
+            max-height: 80vh;
+            border-radius: 20px 20px 0 0;
+            padding: 20px;
+            box-sizing: border-box;
+            overflow-y: auto;
+            border-top: 2px solid var(--neon-pink);
+            box-shadow: 0 -5px 25px rgba(255,0,127,0.2);
+        }
+        .subject-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(255,255,255,0.03);
+            padding: 10px 15px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+        .btn-add {
+            background: linear-gradient(45deg, var(--accent), var(--neon-pink));
+            color: white; border: none; padding: 6px 14px;
+            border-radius: 8px; cursor: pointer; font-weight: bold;
+        }
+
+        /* قائمة السلة الجانبية (Drawer) */
+        .drawer {
+            position: fixed;
+            top: 0; right: -100%; width: 85%; height: 100%;
+            background: #0f172a;
+            z-index: 2000;
+            box-shadow: -5px 0 25px rgba(0,0,0,0.5);
+            transition: 0.3s ease;
+            box-sizing: border-box;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            border-left: 2px solid var(--neon-glow);
+        }
+        .drawer.open { right: 0; }
+        .drawer-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 15px; }
+        .close-drawer { background: none; border: none; color: white; font-size: 22px; cursor: pointer; }
         
-        /* تأثيرات حركية (Animations) */
-        .product-card { background: var(--card-bg); border-radius: 12px; padding: 15px; margin: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); transform: scale(1); transition: transform 0.2s; }
-        .product-card:active { transform: scale(0.98); }
+        .cart-items { flex-grow: 1; overflow-y: auto; margin-top: 15px; }
+        .cart-item { display: flex; justify-content: space-between; background: rgba(255,255,255,0.03); padding: 10px; border-radius: 8px; margin-bottom: 8px; font-size: 13px; }
         
-        .flex-between { display: flex; justify-content: space-between; align-items: center; }
-        .btn-action { background: var(--primary); color: var(--btn-text); border: none; padding: 8px 15px; border-radius: 8px; cursor: pointer; font-weight: bold; margin-top: 10px; width: 100%; display: flex; justify-content: center; align-items: center; gap: 5px;}
-        
-        .form-section { background: var(--card-bg); padding: 15px; margin: 15px; border-radius: 12px; }
-        input { width: 100%; padding: 12px; margin-bottom: 10px; border-radius: 8px; border: 1px solid rgba(128,128,128,0.3); background: var(--bg-color); color: var(--text-main); box-sizing: border-box; }
-        
-        .tools-row { display: flex; gap: 10px; margin-bottom: 10px; }
+        .checkout-form input {
+            width: 100%; padding: 12px; margin-bottom: 10px;
+            border-radius: 8px; border: 1px solid rgba(255,255,255,0.1);
+            background: rgba(255,255,255,0.05); color: white; box-sizing: border-box;
+        }
     </style>
 </head>
 <body>
 
-    <div class="header">
-        <h2>📚 مكتبة ميم</h2>
+    <!-- شاشة الترحيب والبصريات -->
+    <div class="splash-screen">
+        <div class="logo-container">📚</div>
+        <h1>مكتبة ميم</h1>
+        <p>نظام الطلب الذكي المتطور - الطبعة الخاصة</p>
     </div>
 
-    <!-- زر الماسح الضوئي -->
-    <div style="padding: 0 15px; margin-top: 15px;">
-        <button class="btn-action" onclick="scanQR()">📷 امسح باركود الملزمة</button>
+    <!-- شريط علوي مع زر السلة (3 خطوط) والبحث -->
+    <div class="top-bar">
+        <input type="text" id="searchInput" class="search-bar" placeholder="🔍 بحث عن مادة أو صف..." onkeyup="globalSearch()">
+        <button class="menu-btn" onclick="toggleDrawer()">☰</button>
     </div>
 
-    <div class="product-card">
-        <div class="flex-between">
-            <div>
-                <h3 style="margin:0 0 5px 0;">ملزمة بلدوزر التحصيلي</h3>
-                <span style="color: var(--primary); font-weight: bold;">15,000 د.ع</span>
+    <!-- الأقسام الثلاثة الرئيسية (الابتدائية، المتوسطة، الإعدادية) -->
+    <div class="section-container" id="mainSections">
+        
+        <!-- الابتدائية -->
+        <div class="category-group" id="group-primary">
+            <div class="cat-header" onclick="toggleGroup('group-primary')">
+                <span>📖 المرحلة الابتدائية</span>
+                <span>▼</span>
             </div>
-            <div style="display: flex; gap: 10px; align-items: center;">
-                <button class="btn-action" style="width: auto; margin:0;" onclick="updateCart('ملزمة بلدوزر التحصيلي', 15000, -1)">-</button>
-                <span id="qty-ملزمة بلدوزر التحصيلي" style="font-weight:bold;">0</span>
-                <button class="btn-action" style="width: auto; margin:0;" onclick="updateCart('ملزمة بلدوزر التحصيلي', 15000, 1)">+</button>
+            <div class="grades-grid">
+                <div class="grade-card" onclick="openGrade('الأول الابتدائي')"><h4>الأول الابتدائي</h4><span>6 مواد أساسية</span></div>
+                <div class="grade-card" onclick="openGrade('الثاني الابتدائي')"><h4>الثاني الابتدائي</h4><span>6 مواد أساسية</span></div>
+                <div class="grade-card" onclick="openGrade('الثالث الابتدائي')"><h4>الثالث الابتدائي</h4><span>6 مواد أساسية</span></div>
+                <div class="grade-card" onclick="openGrade('الرابع الابتدائي')"><h4>الرابع الابتدائي</h4><span>6 مواد أساسية</span></div>
+                <div class="grade-card" onclick="openGrade('الخامس الابتدائي')"><h4>الخامس الابتدائي</h4><span>6 مواد أساسية</span></div>
+                <div class="grade-card" onclick="openGrade('السادس الابتدائي')"><h4>السادس الابتدائي</h4><span>6 مواد أساسية</span></div>
             </div>
+        </div>
+
+        <!-- المتوسطة -->
+        <div class="category-group" id="group-intermediate">
+            <div class="cat-header" onclick="toggleGroup('group-intermediate')">
+                <span>📘 المرحلة المتوسطة</span>
+                <span>▼</span>
+            </div>
+            <div class="grades-grid">
+                <div class="grade-card" onclick="openGrade('الأول المتوسط')"><h4>الأول المتوسط</h4><span>5 مواد أساسية</span></div>
+                <div class="grade-card" onclick="openGrade('الثاني المتوسط')"><h4>الثاني المتوسط</h4><span>5 مواد أساسية</span></div>
+                <div class="grade-card" onclick="openGrade('الثالث المتوسط')"><h4>الثالث المتوسط</h4><span>5 مواد أساسية</span></div>
+            </div>
+        </div>
+
+        <!-- الإعدادية -->
+        <div class="category-group" id="group-secondary">
+            <div class="cat-header" onclick="toggleGroup('group-secondary')">
+                <span>📙 المرحلة الإعدادية</span>
+                <span>▼</span>
+            </div>
+            <div class="grades-grid">
+                <div class="grade-card" onclick="openGrade('الرابع الإعدادي')"><h4>الرابع الإعدادي</h4><span>5 مواد أساسية</span></div>
+                <div class="grade-card" onclick="openGrade('الخامس الإعدادي')"><h4>الخامس الإعدادي</h4><span>5 مواد أساسية</span></div>
+                <div class="grade-card" onclick="openGrade('السادس الإعدادي')"><h4>السادس الإعدادي</h4><span>5 مواد أساسية</span></div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- نافذة منبثقة لاختيار مواد الصف -->
+    <div class="modal" id="gradeModal" onclick="closeModal(event)">
+        <div class="modal-content" id="modalContent">
+            <h3 id="modalTitle" style="color: var(--neon-glow); margin-top:0;"></h3>
+            <div id="subjectsList"></div>
         </div>
     </div>
 
-    <div class="form-section">
-        <h3>📍 معلومات التوصيل:</h3>
-        <input type="text" id="fullName" placeholder="الاسم الكامل" onchange="saveData()">
-        <input type="tel" id="phone" placeholder="رقم الهاتف" onchange="saveData()">
-        
-        <div class="tools-row">
-            <input type="text" id="address" placeholder="العنوان التفصيلي" onchange="saveData()">
-            <button class="btn-action" style="width: 45px; margin:0;" onclick="getLocation()">📍</button>
+    <!-- قائمة السلة الجانبية (Drawer) -->
+    <div class="drawer" id="cartDrawer">
+        <div class="drawer-header">
+            <h3 style="margin:0; color:var(--neon-glow);">🛒 سلة الطلبات</h3>
+            <button class="close-drawer" onclick="toggleDrawer()">✕</button>
+        </div>
+        <div class="cart-items" id="cartItemsContainer">
+            <p style="text-align:center; color: var(--text-muted); margin-top:20px;">السلة فارغة حالياً</p>
+        </div>
+        <div class="checkout-form">
+            <h4 style="margin:10px 0; font-size:14px;">📍 بيانات التوصيل:</h4>
+            <input type="text" id="fullName" placeholder="الاسم الكامل">
+            <input type="tel" id="phone" placeholder="رقم الهاتف">
+            <input type="text" id="address" placeholder="العنوان أو موقع الـ GPS">
         </div>
     </div>
 
     <script>
         let tg = window.Telegram.WebApp;
-        tg.expand(); 
-        
+        tg.expand();
+
         let cart = {};
-        let total = 0;
 
-        // 1. استرجاع البيانات من التخزين السحابي عند الفتح
-        tg.CloudStorage.getItem('userData', function(err, value) {
-            if (!err && value) {
-                let data = JSON.parse(value);
-                document.getElementById('fullName').value = data.name || '';
-                document.getElementById('phone').value = data.phone || '';
-                document.getElementById('address').value = data.address || '';
+        // فتح/غلق الأقسام الرئيسية
+        function toggleGroup(groupId) {
+            tg.HapticFeedback.impactOccurred('light');
+            let el = document.getElementById(groupId);
+            el.classList.toggle('open');
+        }
+
+        // فتح نافذة الصف واختيار المواد الأساسية (رياضيات، علوم/فيزياء، إنجليزي، عربي، إسلامية)
+        function openGrade(gradeName) {
+            tg.HapticFeedback.impactOccurred('medium');
+            document.getElementById('modalTitle').innerText = `ملازم ${gradeName}`;
+            
+            let subjects = [
+                { name: 'الرياضيات', price: 6000 },
+                { name: 'اللغة العربية', price: 5000 },
+                { name: 'اللغة الإنجليزية', price: 5000 },
+                { name: 'العلوم / الفيزياء', price: 6000 },
+                { name: 'التربية الإسلامية', price: 4000 }
+            ];
+
+            let html = '';
+            subjects.forEach(sub => {
+                let fullNameItem = `${gradeName} - ${sub.name}`;
+                html += `
+                    <div class="subject-row">
+                        <div>
+                            <div style="font-weight:bold; font-size:14px;">${sub.name}</div>
+                            <div style="font-size:12px; color:var(--success);">${sub.price.toLocaleString()} د.ع</div>
+                        </div>
+                        <button class="btn-add" onclick="addToCart('${fullNameItem}', ${sub.price})">إضافة للسلة</button>
+                    </div>
+                `;
+            });
+
+            document.getElementById('subjectsList').innerHTML = html;
+            document.getElementById('gradeModal').style.display = 'flex';
+        }
+
+        function closeModal(e) {
+            if (e.target.id === 'gradeModal') {
+                document.getElementById('gradeModal').style.display = 'none';
             }
-        });
-
-        // 2. حفظ البيانات سحابياً (تعمل تلقائياً عند الكتابة)
-        function saveData() {
-            let data = {
-                name: document.getElementById('fullName').value,
-                phone: document.getElementById('phone').value,
-                address: document.getElementById('address').value
-            };
-            tg.CloudStorage.setItem('userData', JSON.stringify(data));
         }
 
-        // 3. نظام الاهتزاز مع السلة
-        function updateCart(name, price, change) {
-            tg.HapticFeedback.impactOccurred('light'); // اهتزاز خفيف
-            
-            if (!cart[name]) cart[name] = { price: price, qty: 0 };
-            cart[name].qty += change;
-            if (cart[name].qty < 0) cart[name].qty = 0;
-            
-            document.getElementById('qty-' + name).innerText = cart[name].qty;
-            if (cart[name].qty === 0) delete cart[name];
-            
-            updateMainButton();
+        // فتح/غلق القائمة الجانبية (السلة) عبر زر الـ ☰
+        function toggleDrawer() {
+            tg.HapticFeedback.impactOccurred('light');
+            let drawer = document.getElementById('cartDrawer');
+            drawer.classList.toggle('open');
         }
 
-        function updateMainButton() {
-            total = 0;
-            for (let key in cart) total += cart[key].price * cart[key].qty;
-            
-            if (total > 0) {
-                tg.MainButton.text = `تأكيد الطلب | ${total.toLocaleString()} د.ع`;
+        // إضافة منتج للسلة مع اهتزاز تفاعلي
+        function addToCart(itemName, price) {
+            tg.HapticFeedback.notificationOccurred('success');
+            if (!cart[itemName]) {
+                cart[itemName] = { price: price, qty: 1 };
+            } else {
+                cart[itemName].qty += 1;
+            }
+            updateCartUI();
+            tg.showAlert(`تمت إضافة "${itemName}" بنجاح إلى السلة!`);
+        }
+
+        // تحديث محتوى السلة وزر التليجرام الرئيسي
+        function updateCartUI() {
+            let container = document.getElementById('cartItemsContainer');
+            let total = 0;
+            let count = 0;
+            let html = '';
+
+            for (let name in cart) {
+                let itemTotal = cart[name].price * cart[name].qty;
+                total += itemTotal;
+                count += cart[name].qty;
+                html += `
+                    <div class="cart-item">
+                        <div><b>${name}</b><br>العدد: ${cart[name].qty}</div>
+                        <div style="color:var(--success); font-weight:bold;">${itemTotal.toLocaleString()} د.ع</div>
+                    </div>
+                `;
+            }
+
+            if (count > 0) {
+                container.innerHTML = html;
+                tg.MainButton.text = `تأكيد وإرسال الطلب (${total.toLocaleString()} د.ع)`;
                 tg.MainButton.show();
             } else {
+                container.innerHTML = '<p style="text-align:center; color: var(--text-muted); margin-top:20px;">السلة فارغة حالياً</p>';
                 tg.MainButton.hide();
             }
         }
 
-        // 4. الماسح الضوئي (QR Scanner)
-        function scanQR() {
-            tg.HapticFeedback.impactOccurred('medium');
-            tg.showScanQrPopup({text: "وجّه الكاميرا نحو باركود الملزمة"}, function(text) {
-                tg.showAlert("تم قراءة الكود: " + text);
-                return true; 
+        // محرك البحث الشامل لكل الصفوف والمواد
+        function globalSearch() {
+            let query = document.getElementById('searchInput').value.toLowerCase();
+            let groups = document.querySelectorAll('.category-group');
+
+            groups.forEach(group => {
+                let cards = group.querySelectorAll('.grade-card');
+                let groupHasMatch = false;
+
+                cards.forEach(card => {
+                    let title = card.querySelector('h4').innerText.toLowerCase();
+                    if (title.includes(query) || query === '') {
+                        card.style.display = 'block';
+                        groupHasMatch = true;
+                    } else {
+                        card.style.display = 'none';
+                    }
+                });
+
+                if (groupHasMatch) {
+                    group.style.display = 'block';
+                    if (query !== '') group.classList.add('open');
+                } else {
+                    group.style.display = 'none';
+                }
             });
         }
 
-        // 5. سحب الموقع الجغرافي (GPS)
-        function getLocation() {
-            tg.HapticFeedback.impactOccurred('medium');
-            if (navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition(function(position) {
-                    let locText = `احداثيات: ${position.coords.latitude.toFixed(4)}, ${position.coords.longitude.toFixed(4)}`;
-                    document.getElementById('address').value = locText;
-                    saveData();
-                    tg.showAlert("تم سحب الموقع بنجاح!");
-                }, function() {
-                    tg.showAlert("يرجى تفعيل صلاحية الموقع من إعدادات الهاتف.");
-                });
-            }
-        }
+        // إرسال الطلب عبر Telegram WebApp Data
+        Telegram.WebApp.onEvent('mainButtonClicked', function() {
+            tg.HapticFeedback.impactOccurred('heavy');
+            let name = document.getElementById('fullName').value.trim();
+            let phone = document.getElementById('phone').value.trim();
+            let address = document.getElementById('address').value.trim();
 
-        // إرسال الطلب
-        Telegram.WebApp.onEvent('mainButtonClicked', function(){
-            tg.HapticFeedback.notificationOccurred('success'); // اهتزاز نجاح قوي
-            
-            let name = document.getElementById('fullName').value;
-            let phone = document.getElementById('phone').value;
-            let address = document.getElementById('address').value;
-
-            if(!name || !phone || !address) {
-                tg.HapticFeedback.notificationOccurred('error');
-                tg.showAlert("رجاءً املأ كل المعلومات!");
+            if (!name || !phone || !address) {
+                tg.showAlert("يرجى ملء بيانات التوصيل (الاسم، الرقم، العنوان) داخل قائمة السلة قبل الإرسال!");
+                toggleDrawer();
                 return;
             }
 
             let itemsArray = [];
-            for (let key in cart) itemsArray.push({ name: `${cart[key].qty}x ${key}`, price: cart[key].price * cart[key].qty });
+            let total = 0;
+            for (let nameKey in cart) {
+                itemsArray.push({
+                    name: `${cart[nameKey].qty}x ${nameKey}`,
+                    price: cart[nameKey].price * cart[nameKey].qty
+                });
+                total += cart[nameKey].price * cart[nameKey].qty;
+            }
 
-            tg.sendData(JSON.stringify({ customer_name: name, customer_phone: phone, customer_address: address, items: itemsArray, total_price: total })); 
+            let orderData = {
+                customer_name: name,
+                customer_phone: phone,
+                customer_address: address,
+                items: itemsArray,
+                total_price: total
+            };
+
+            tg.sendData(JSON.stringify(orderData));
         });
     </script>
 </body>
