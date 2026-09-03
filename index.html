@@ -3,38 +3,60 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>مكتبة ميم</title>
+    <title>مكتبة ميم - الإصدار الملكي</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         :root { --bg: #0b0f19; --card: #131c2e; --neon: #00f0ff; --text: #fff; --success: #10b981; --accent: #ff007f; }
-        body { font-family: system-ui, sans-serif; background: var(--bg); color: var(--text); margin: 0; padding-bottom: 90px; }
+        body { font-family: system-ui, sans-serif; background: var(--bg); color: var(--text); margin: 0; padding-bottom: 90px; overflow-x: hidden;}
         
-        .header { text-align: center; padding: 20px; border-bottom: 1px solid rgba(0,240,255,0.2); box-shadow: 0 0 15px rgba(0,240,255,0.1); }
-        .header h2 { margin: 0; color: var(--neon); text-shadow: 0 0 10px rgba(0,240,255,0.4); }
+        /* الشريط العلوي */
+        .top-bar { display: flex; justify-content: space-between; align-items: center; padding: 15px; background: var(--card); border-bottom: 1px solid rgba(0,240,255,0.2); position: sticky; top: 0; z-index: 100;}
+        .menu-btn { background: none; border: none; color: var(--neon); font-size: 26px; cursor: pointer; text-shadow: 0 0 10px var(--neon); }
+        .search-box { flex-grow: 1; margin: 0 15px; position: relative; }
+        .search-box input { width: 100%; padding: 10px 15px; border-radius: 20px; border: 1px solid rgba(0,240,255,0.3); background: rgba(255,255,255,0.05); color: white; outline: none; box-sizing: border-box;}
+        .search-box input:focus { border-color: var(--neon); box-shadow: 0 0 10px rgba(0,240,255,0.2); }
+        
+        .header-logo { text-align: center; padding: 15px; }
+        .header-logo h2 { margin: 0; color: var(--neon); text-shadow: 0 0 10px rgba(0,240,255,0.4); }
         
         .container { padding: 15px; }
-        .main-btn { background: var(--card); border: 1px solid var(--neon); color: var(--text); padding: 18px; width: 100%; border-radius: 12px; font-size: 16px; font-weight: bold; margin-bottom: 15px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; box-sizing: border-box; transition: 0.2s;}
-        .main-btn:active { transform: scale(0.97); background: rgba(0,240,255,0.1); }
+        .main-btn { background: var(--card); border: 1px solid var(--neon); color: var(--text); padding: 18px; width: 100%; border-radius: 12px; font-size: 16px; font-weight: bold; margin-bottom: 15px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; box-sizing: border-box; }
+        .main-btn:active { transform: scale(0.97); }
         
         .grid-list { display: grid; grid-template-columns: 1fr; gap: 10px; }
         .item-card { background: rgba(255,255,255,0.03); padding: 15px; border-radius: 10px; display: flex; justify-content: space-between; align-items: center; border: 1px solid rgba(255,255,255,0.08); }
         .action-btn { background: var(--neon); color: #000; border: none; padding: 8px 15px; border-radius: 8px; font-weight: bold; cursor: pointer; }
         
-        .modal { position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); display:none; justify-content:center; align-items:center; z-index:100; backdrop-filter: blur(5px); }
-        .modal-box { background: var(--card); padding: 20px; border-radius: 15px; width: 85%; border: 1px solid var(--neon); }
+        /* القائمة الجانبية (Drawer) */
+        .drawer { position: fixed; top: 0; right: -100%; width: 80%; height: 100%; background: #0f172a; z-index: 2000; transition: 0.3s; border-left: 2px solid var(--neon); padding: 20px; box-sizing: border-box; display: flex; flex-direction: column; }
+        .drawer.open { right: 0; }
+        .close-btn { text-align: left; font-size: 24px; color: var(--accent); cursor: pointer; }
         
-        .nav-bar { display: none; padding: 12px 15px; background: rgba(0,240,255,0.1); margin-bottom: 15px; cursor: pointer; color: var(--neon); font-weight: bold; text-align: center; border-radius: 10px; }
+        .loyalty-points { background: rgba(16, 185, 129, 0.1); border: 1px solid var(--success); padding: 10px; border-radius: 10px; text-align: center; margin: 15px 0; color: var(--success); font-weight: bold; }
         
-        .cart-bar { position: fixed; bottom: 0; left: 0; width: 100%; background: var(--card); padding: 15px; box-sizing: border-box; border-top: 1px solid var(--neon); display: flex; justify-content: space-between; align-items: center; z-index: 50; }
-        .checkout-box { display: none; position: fixed; top:0; left:0; width:100%; height:100%; background: var(--bg); z-index:200; padding: 20px; box-sizing: border-box; overflow-y: auto; }
-        .checkout-box input { width: 100%; padding: 12px; margin-bottom: 12px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.05); color: white; box-sizing: border-box; outline: none;}
-        .checkout-box input:focus { border-color: var(--neon); }
-        .promo-container { display: flex; gap: 10px; margin-bottom: 15px; }
+        /* شاشة الدفع */
+        .checkout-box { display: none; position: fixed; top:0; left:0; width:100%; height:100%; background: var(--bg); z-index: 3000; padding: 20px; box-sizing: border-box; overflow-y: auto; }
+        .checkout-box input { width: 100%; padding: 12px; margin-bottom: 12px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.05); color: white; box-sizing: border-box; }
+        
+        /* لوحة تحكم الأونر */
+        .admin-panel { display: none; position: fixed; top:0; left:0; width:100%; height:100%; background: var(--bg); z-index: 4000; padding: 20px; box-sizing: border-box; overflow-y: auto; }
     </style>
 </head>
 <body>
 
-    <div class="header"><h2>📚 مكتبة ميم</h2><p>النظام الذكي للطلبات</p></div>
+    <!-- الشريط العلوي مع محرك البحث والماسح -->
+    <div class="top-bar">
+        <button class="menu-btn" onclick="toggleDrawer()">☰</button>
+        <div class="search-box">
+            <input type="text" id="globalSearch" placeholder="ابحث عن مادة أو صف..." oninput="executeSearch()">
+        </div>
+        <button class="menu-btn" style="font-size: 20px;" onclick="scanQR()">📷</button>
+    </div>
+
+    <div class="header-logo">
+        <h2>📚 مكتبة ميم</h2>
+        <p style="color:var(--text-muted); font-size:13px;">تصفح الملازم والكتب بسهولة</p>
+    </div>
     
     <div class="container" id="contentArea">
         <div id="view-main">
@@ -42,42 +64,52 @@
             <button class="main-btn" onclick="openSection('malazim')">📙 الملازم الدراسية <span style="color:var(--neon);">🡐</span></button>
         </div>
     </div>
-    <div class="container" style="padding-top:0;">
-        <div class="nav-bar" id="navBar" onclick="goBack()">🔙 عودة للقائمة الرئيسية</div>
-    </div>
-
-    <!-- نافذة المدرسين -->
-    <div class="modal" id="teacherModal">
-        <div class="modal-box">
-            <h3 id="teacherModalTitle" style="margin-top:0; color:var(--neon);">اختر المدرس</h3>
-            <div class="grid-list" id="teachersList"></div>
-            <button class="action-btn" style="width:100%; margin-top:15px; background:#444; color:white;" onclick="closeModal()">إلغاء</button>
-        </div>
-    </div>
-
-    <!-- شريط السلة -->
-    <div class="cart-bar" id="cartBar" style="display:none;">
-        <div id="cartTotalText">الإجمالي: 0 د.ع</div>
-        <button class="action-btn" onclick="openCheckout()">إتمام الطلب 🛒</button>
-    </div>
-
-    <!-- صفحة الدفع -->
-    <div class="checkout-box" id="checkoutView">
-        <h2 style="color:var(--neon); margin-top:0;">فاتورة الطلب</h2>
-        <div id="checkoutCartItems" style="margin-bottom:15px; font-size:14px; color:#aaa; max-height:150px; overflow-y:auto; background: rgba(255,255,255,0.02); padding: 10px; border-radius: 8px;"></div>
+    
+    <!-- القائمة الجانبية (السلة والإعدادات) -->
+    <div class="drawer" id="sideDrawer">
+        <div class="close-btn" onclick="toggleDrawer()">✕</div>
+        <h2 style="color:var(--neon); margin-top:0;">القائمة والسلة</h2>
         
-        <!-- نظام الكوبونات -->
-        <div class="promo-container">
-            <input type="text" id="promoCode" placeholder="كود الخصم (إن وجد)" style="margin:0;">
-            <button class="action-btn" onclick="applyPromo()" style="white-space: nowrap;">تفعيل</button>
+        <div class="loyalty-points">⭐ نقاط الولاء: <span id="userPoints">0</span> نقطة</div>
+        
+        <div id="cartItemsList" style="flex-grow:1; overflow-y:auto; margin-bottom:15px;">
+            <p style="color:var(--text-muted); text-align:center;">السلة فارغة</p>
         </div>
+        
+        <h3 id="drawerTotal" style="color:var(--neon);">الإجمالي: 0 د.ع</h3>
+        <button class="main-btn" style="background:var(--success); color:black; border:none; justify-content:center;" onclick="openCheckout()">إتمام الطلب 🛒</button>
+        
+        <hr style="border-color:rgba(255,255,255,0.1); width:100%; margin: 20px 0;">
+        <button class="action-btn" style="background:#333; color:white; width:100%;" onclick="openAdminLogin()">⚙️ تفعيل حساب الأونر</button>
+    </div>
 
+    <!-- شاشة الدفع -->
+    <div class="checkout-box" id="checkoutView">
+        <h2 style="color:var(--neon);">تأكيد الطلب</h2>
         <input type="text" id="custName" placeholder="الاسم الكامل">
         <input type="tel" id="custPhone" placeholder="رقم الهاتف">
         <input type="text" id="custAddress" placeholder="المحافظة - المنطقة - أقرب نقطة دالة">
         
-        <button class="main-btn" style="justify-content:center; margin-top:10px; background:var(--success); color:black; border:none;" onclick="submitOrder()">تأكيد الطلب ✅</button>
-        <button class="main-btn" style="justify-content:center; margin-top:5px; background:rgba(255,255,255,0.1); border:none;" onclick="closeCheckout()">رجوع للمتجر</button>
+        <button class="main-btn" style="justify-content:center; background:var(--neon); color:black; border:none;" onclick="submitOrder()">إرسال الطلب للنظام ✅</button>
+        <button class="main-btn" style="justify-content:center; background:rgba(255,255,255,0.1); border:none;" onclick="closeCheckout()">إلغاء الرجوع</button>
+    </div>
+
+    <!-- لوحة تحكم الأونر -->
+    <div class="admin-panel" id="adminView">
+        <h2 style="color:var(--accent);">👑 لوحة تحكم الأونر</h2>
+        <p style="color:var(--text-muted);">مرحباً بك في غرفة التحكم المتقدمة.</p>
+        
+        <div class="item-card" style="border-color:var(--accent); margin-bottom:15px;">
+            <b>تعديل السعر الموحد للكتب</b>
+            <input type="number" id="adminBookPrice" value="5000" style="width:70px; padding:5px; border-radius:5px; text-align:center;">
+        </div>
+        <div class="item-card" style="border-color:var(--accent); margin-bottom:15px;">
+            <b>تعديل السعر الموحد للملازم</b>
+            <input type="number" id="adminMalzamaPrice" value="10000" style="width:70px; padding:5px; border-radius:5px; text-align:center;">
+        </div>
+        
+        <button class="action-btn" style="width:100%; background:var(--accent); color:white; margin-bottom:10px;" onclick="saveAdminSettings()">💾 حفظ التعديلات في النظام</button>
+        <button class="main-btn" style="justify-content:center; background:rgba(255,255,255,0.1); border:none;" onclick="closeAdmin()">خروج من لوحة التحكم</button>
     </div>
 
     <script>
@@ -85,57 +117,90 @@
         tg.expand();
         tg.ready();
         
-        let currentMode = ''; 
         let cart = {};
-        let totalCartPrice = 0;
-        let finalPrice = 0;
-        let discountApplied = false;
+        let loyaltyPoints = 0;
         
-        const dataConfig = {
-            stages: [
-                { id: 'primary', name: 'المرحلة الابتدائية' },
-                { id: 'middle', name: 'المرحلة المتوسطة' },
-                { id: 'high', name: 'المرحلة الإعدادية' }
-            ],
-            grades: {
-                primary: ['الأول الابتدائي', 'الثاني الابتدائي', 'الثالث الابتدائي', 'الرابع الابتدائي', 'الخامس الابتدائي', 'السادس الابتدائي'],
-                middle: ['الأول المتوسط', 'الثاني المتوسط', 'الثالث المتوسط'],
-                high: ['الرابع الإعدادي', 'الخامس الإعدادي', 'السادس الإعدادي']
-            },
-            subjectsBase: ['الرياضيات', 'العلوم', 'اللغة الإنجليزية', 'اللغة العربية', 'التربية الإسلامية']
+        // أسعار قابلة للتعديل من لوحة الأونر (تخزن في LocalStorage)
+        let configPrices = {
+            book: localStorage.getItem('priceBook') ? parseInt(localStorage.getItem('priceBook')) : 5000,
+            malzama: localStorage.getItem('priceMalzama') ? parseInt(localStorage.getItem('priceMalzama')) : 10000,
+            package: 25000
         };
 
+        // استرجاع نقاط الولاء سحابياً
+        tg.CloudStorage.getItem('loyaltyPoints', function(err, val) {
+            if(!err && val) {
+                loyaltyPoints = parseInt(val);
+                document.getElementById('userPoints').innerText = loyaltyPoints;
+            }
+        });
+
+        // هيكلية البيانات الأساسية للبحث والعرض
+        const database = {
+            primary: ['الرابع الابتدائي', 'الخامس الابتدائي', 'السادس الابتدائي'],
+            middle: ['الأول المتوسط', 'الثاني المتوسط', 'الثالث المتوسط'],
+            high: ['الرابع الإعدادي', 'الخامس الإعدادي', 'السادس الإعدادي']
+        };
+        const subjectsList = ['الرياضيات', 'العلوم', 'اللغة الإنجليزية', 'اللغة العربية', 'التربية الإسلامية'];
         const teachers = ['أ. حيدر وليد', 'أ. حيدر عبد الأئمة'];
-        let selectedSubjectTemp = '';
-        let selectedGradeTemp = '';
+
+        let currentMode = ''; 
+        let tempGrade = '';
 
         function renderHTML(html) { document.getElementById('contentArea').innerHTML = html; }
 
-        function openSection(mode) {
+        function toggleDrawer() { 
             tg.HapticFeedback.impactOccurred('light');
-            currentMode = mode;
-            document.getElementById('navBar').style.display = 'block';
-            let html = '<div class="grid-list">';
-            dataConfig.stages.forEach(s => {
-                html += `<button class="main-btn" onclick="openStage('${s.id}')">${s.name} <span style="color:var(--text-muted);">🡐</span></button>`;
+            document.getElementById('sideDrawer').classList.toggle('open'); 
+            updateCartUI();
+        }
+        
+        function scanQR() {
+            tg.HapticFeedback.impactOccurred('medium');
+            tg.showScanQrPopup({text: "وجّه الكاميرا نحو باركود الملزمة"}, function(text) {
+                tg.showAlert("تم قراءة الباركود: " + text + "\n(سيتم ربطها بقاعدة البيانات قريباً)");
+                return true; 
+            });
+        }
+
+        // خوارزمية البحث الذكية
+        function executeSearch() {
+            let query = document.getElementById('globalSearch').value.trim();
+            if(query.length < 2) {
+                if(query.length === 0) renderHTML(`<div id="view-main"><button class="main-btn" onclick="openSection('books')">📘 الكتب المدرسية <span style="color:var(--neon);">🡐</span></button><button class="main-btn" onclick="openSection('malazim')">📙 الملازم الدراسية <span style="color:var(--neon);">🡐</span></button></div>`);
+                return;
+            }
+            
+            // بحث بسيط يولد نتائج فورية
+            let html = '<div class="grid-list"><h3 style="color:var(--neon); margin:0;">نتائج البحث:</h3>';
+            Object.keys(database).forEach(stage => {
+                database[stage].forEach(grade => {
+                    if(grade.includes(query) || query.includes('رياضيات') || query.includes('علوم')) {
+                        html += `<div class="item-card" onclick="openSubjects('${grade}', '${stage}')">
+                                    <b>${grade}</b> <span style="color:var(--neon);">عرض 🡐</span>
+                                 </div>`;
+                    }
+                });
             });
             html += '</div>';
             renderHTML(html);
         }
 
-        function openStage(stageId) {
-            tg.HapticFeedback.impactOccurred('light');
+        function openSection(mode) {
+            currentMode = mode;
             let html = '<div class="grid-list">';
-            let availableGrades = dataConfig.grades[stageId];
-            
-            if(currentMode === 'malazim' && stageId === 'primary') {
-                availableGrades = ['الرابع الابتدائي', 'الخامس الابتدائي', 'السادس الابتدائي'];
-            }
+            html += `<button class="main-btn" onclick="openStage('primary')">المرحلة الابتدائية (4-6) 🡐</button>`;
+            html += `<button class="main-btn" onclick="openStage('middle')">المرحلة المتوسطة 🡐</button>`;
+            html += `<button class="main-btn" onclick="openStage('high')">المرحلة الإعدادية 🡐</button>`;
+            html += '</div>';
+            renderHTML(html);
+        }
 
-            availableGrades.forEach(g => {
+        function openStage(stageId) {
+            let html = '<div class="grid-list">';
+            database[stageId].forEach(g => {
                 html += `<div class="item-card" onclick="openSubjects('${g}', '${stageId}')">
-                            <b style="font-size:15px;">${g}</b>
-                            <span style="color:var(--neon); font-size:12px; font-weight:bold;">عرض المواد 🡐</span>
+                            <b>${g}</b> <span style="color:var(--neon);">المواد 🡐</span>
                          </div>`;
             });
             html += '</div>';
@@ -143,29 +208,23 @@
         }
 
         function openSubjects(grade, stageId) {
-            tg.HapticFeedback.impactOccurred('medium');
+            tempGrade = grade;
             let html = '<div class="grid-list">';
-            let subs = [...dataConfig.subjectsBase];
-            
+            let subs = [...subjectsList];
             if(stageId !== 'high') subs.push('الاجتماعيات');
 
             if(currentMode === 'books') {
-                html += `<div class="item-card" style="border-color:var(--success); background:rgba(16, 185, 129, 0.05);">
-                            <div><b style="color:var(--success);">باكج دراسي كامل</b><br><span style="font-size:12px; color:#aaa;">جميع المواد المنهجية</span></div>
-                            <button class="action-btn" style="background:var(--success); color:white;" onclick="addToCart('${grade} - باكج كامل', 25000)">25,000 د.ع</button>
+                html += `<div class="item-card" style="border-color:var(--success);">
+                            <b style="color:var(--success);">باكج دراسي كامل</b>
+                            <button class="action-btn" onclick="addToCart('${grade} - باكج كامل', ${configPrices.package})">${configPrices.package.toLocaleString()} د.ع</button>
                          </div>`;
-                         
                 subs.forEach(s => {
-                    html += `<div class="item-card">
-                                <b>كتاب ${s}</b>
-                                <button class="action-btn" onclick="addToCart('${grade} - كتاب ${s}', 5000)">5,000 د.ع</button>
-                             </div>`;
+                    html += `<div class="item-card"><b>كتاب ${s}</b><button class="action-btn" onclick="addToCart('${grade} - كتاب ${s}', ${configPrices.book})">${configPrices.book.toLocaleString()} د.ع</button></div>`;
                 });
             } else {
                 subs.forEach(s => {
-                    html += `<div class="item-card" onclick="showTeachers('${grade}', '${s}')">
-                                <b>ملزمة ${s}</b>
-                                <span style="color:var(--neon); font-size:12px; border: 1px solid var(--neon); padding: 4px 8px; border-radius: 6px;">اختر المدرس</span>
+                    html += `<div class="item-card" onclick="addToCart('${grade} - ملزمة ${s} (${teachers[0]})', ${configPrices.malzama})">
+                                <b>ملزمة ${s}</b><span style="color:var(--neon); font-size:12px;">+ إضافة للسلة</span>
                              </div>`;
                 });
             }
@@ -173,109 +232,90 @@
             renderHTML(html);
         }
 
-        function showTeachers(grade, subject) {
-            selectedGradeTemp = grade;
-            selectedSubjectTemp = subject;
-            document.getElementById('teacherModalTitle').innerText = `مدرسي ${subject}`;
-            let html = '';
-            teachers.forEach(t => {
-                html += `<div class="item-card" style="margin-bottom:8px;">
-                            <b>${t}</b>
-                            <button class="action-btn" onclick="addMalzama('${t}')">إضافة للسلة</button>
-                         </div>`;
-            });
-            document.getElementById('teachersList').innerHTML = html;
-            document.getElementById('teacherModal').style.display = 'flex';
-        }
-
-        function addMalzama(teacherName) {
-            let itemName = `${selectedGradeTemp} - ملزمة ${selectedSubjectTemp} (${teacherName})`;
-            addToCart(itemName, 10000); 
-            closeModal();
-        }
-
-        function closeModal() { document.getElementById('teacherModal').style.display = 'none'; }
-
         function addToCart(name, price) {
             tg.HapticFeedback.notificationOccurred('success');
             if(!cart[name]) cart[name] = { price: price, qty: 1 };
             else cart[name].qty++;
-            updateCartBar();
-            tg.showAlert(`✅ تمت إضافة ${name} للسلة`);
+            tg.showAlert(`تمت الإضافة: ${name}`);
         }
 
-        function updateCartBar() {
-            totalCartPrice = 0;
-            for(let k in cart) totalCartPrice += cart[k].price * cart[k].qty;
-            finalPrice = totalCartPrice;
-            if(discountApplied) finalPrice = totalCartPrice * 0.9;
-            
-            if(totalCartPrice > 0) {
-                document.getElementById('cartTotalText').innerHTML = `الإجمالي: <b style="color:var(--neon);">${finalPrice.toLocaleString()} د.ع</b>`;
-                document.getElementById('cartBar').style.display = 'flex';
-            }
-        }
-
-        function applyPromo() {
-            let code = document.getElementById('promoCode').value.toUpperCase().trim();
-            if (code === 'ALI2026') {
-                tg.HapticFeedback.notificationOccurred('success');
-                discountApplied = true;
-                updateCartBar();
-                updateCheckoutCart();
-                tg.showAlert("🎉 تم تفعيل الخصم 10% بنجاح!");
-            } else {
-                tg.HapticFeedback.notificationOccurred('error');
-                tg.showAlert("❌ الكود غير صحيح أو منتهي الصلاحية.");
-            }
-        }
-
-        function updateCheckoutCart() {
+        function updateCartUI() {
+            let total = 0;
             let html = '';
-            for(let k in cart) html += `<div style="margin-bottom:5px;">▪️ ${cart[k].qty}x ${k} = ${(cart[k].price * cart[k].qty).toLocaleString()} د.ع</div>`;
-            if(discountApplied) {
-                html += `<hr style="border-color:#333;"><div style="color:var(--success);">خصم الكود: -${(totalCartPrice * 0.1).toLocaleString()} د.ع</div>`;
+            for(let k in cart) {
+                total += cart[k].price * cart[k].qty;
+                html += `<div style="background:rgba(255,255,255,0.05); padding:10px; margin-bottom:5px; border-radius:5px; font-size:14px; display:flex; justify-content:space-between;">
+                            <span>${cart[k].qty}x ${k}</span>
+                            <span style="color:var(--success);">${(cart[k].price * cart[k].qty).toLocaleString()}</span>
+                         </div>`;
             }
-            html += `<h3 style="color:white; margin-bottom:0;">المطلوب: ${finalPrice.toLocaleString()} د.ع</h3>`;
-            document.getElementById('checkoutCartItems').innerHTML = html;
+            document.getElementById('cartItemsList').innerHTML = html || '<p style="text-align:center;">السلة فارغة</p>';
+            document.getElementById('drawerTotal').innerText = `الإجمالي: ${total.toLocaleString()} د.ع`;
         }
 
         function openCheckout() {
-            updateCheckoutCart();
+            if(Object.keys(cart).length === 0) return tg.showAlert("السلة فارغة!");
+            document.getElementById('sideDrawer').classList.remove('open');
             document.getElementById('checkoutView').style.display = 'block';
         }
 
         function closeCheckout() { document.getElementById('checkoutView').style.display = 'none'; }
 
-        function goBack() {
-            tg.HapticFeedback.impactOccurred('light');
-            document.getElementById('navBar').style.display = 'none';
-            let html = `
-                <div id="view-main">
-                    <button class="main-btn" onclick="openSection('books')">📘 الكتب المدرسية <span style="color:var(--neon);">🡐</span></button>
-                    <button class="main-btn" onclick="openSection('malazim')">📙 الملازم الدراسية <span style="color:var(--neon);">🡐</span></button>
-                </div>
-            `;
-            renderHTML(html);
-            document.getElementById('cartBar').style.display = 'none';
-            cart = {}; updateCartBar();
+        // نظام الأونر السري
+        function openAdminLogin() {
+            let code = prompt("أدخل رمز الأونر السري:");
+            if(code === "ALI2026") {
+                tg.HapticFeedback.notificationOccurred('success');
+                document.getElementById('sideDrawer').classList.remove('open');
+                document.getElementById('adminView').style.display = 'block';
+            } else {
+                tg.HapticFeedback.notificationOccurred('error');
+                alert("الرمز غير صحيح!");
+            }
+        }
+        
+        function saveAdminSettings() {
+            localStorage.setItem('priceBook', document.getElementById('adminBookPrice').value);
+            localStorage.setItem('priceMalzama', document.getElementById('adminMalzamaPrice').value);
+            configPrices.book = parseInt(document.getElementById('adminBookPrice').value);
+            configPrices.malzama = parseInt(document.getElementById('adminMalzamaPrice').value);
+            tg.showAlert("✅ تم تحديث الأسعار في النظام المحلي بنجاح!");
         }
 
+        function closeAdmin() { document.getElementById('adminView').style.display = 'none'; }
+
+        // الإرسال الفعلي المحمي
         function submitOrder() {
             let name = document.getElementById('custName').value.trim();
             let phone = document.getElementById('custPhone').value.trim();
             let addr = document.getElementById('custAddress').value.trim();
+            
             if(!name || !phone || !addr) {
                 tg.HapticFeedback.notificationOccurred('error');
                 return tg.showAlert('⚠️ يرجى ملء كافة معلومات التوصيل!');
             }
             
-            tg.HapticFeedback.notificationOccurred('success');
+            let total = 0;
             let itemsArr = [];
-            for(let k in cart) itemsArr.push({ name: `${cart[k].qty}x ${k}`, price: cart[k].price * cart[k].qty });
+            for(let k in cart) {
+                itemsArr.push({ name: `${cart[k].qty}x ${k}`, price: cart[k].price * cart[k].qty });
+                total += cart[k].price * cart[k].qty;
+            }
             
-            let data = { customer_name: name, customer_phone: phone, customer_address: addr, items: itemsArr, total_price: finalPrice, discount: discountApplied };
-            tg.sendData(JSON.stringify(data));
+            // إضافة 5 نقاط ولاء عند الطلب
+            loyaltyPoints += 5;
+            tg.CloudStorage.setItem('loyaltyPoints', loyaltyPoints.toString());
+            
+            let data = { customer_name: name, customer_phone: phone, customer_address: addr, items: itemsArr, total_price: total };
+            
+            tg.HapticFeedback.notificationOccurred('success');
+            
+            // إرسال البيانات وإغلاق الواجهة
+            try {
+                tg.sendData(JSON.stringify(data));
+            } catch(e) {
+                alert("حدث خطأ أثناء الإرسال، تأكد من تحديث تليجرام.");
+            }
         }
     </script>
 </body>
