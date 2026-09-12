@@ -3,113 +3,155 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>مكتبة ميم - الإصدار الملكي</title>
+    <title>مكتبة ميم - النظام الاحترافي</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        :root { --bg: #0b0f19; --card: #131c2e; --neon: #00f0ff; --text: #fff; --success: #10b981; --accent: #ff007f; }
+        :root { --bg: #0b0f19; --card: #131c2e; --neon: #00f0ff; --text: #fff; --success: #31a24c; --accent: #ff007f; --warning: #f59e0b; }
         body { font-family: system-ui, sans-serif; background: var(--bg); color: var(--text); margin: 0; padding-bottom: 90px; overflow-x: hidden;}
         
-        /* الشريط العلوي */
         .top-bar { display: flex; justify-content: space-between; align-items: center; padding: 15px; background: var(--card); border-bottom: 1px solid rgba(0,240,255,0.2); position: sticky; top: 0; z-index: 100;}
-        .menu-btn { background: none; border: none; color: var(--neon); font-size: 26px; cursor: pointer; text-shadow: 0 0 10px var(--neon); }
-        .search-box { flex-grow: 1; margin: 0 15px; position: relative; }
-        .search-box input { width: 100%; padding: 10px 15px; border-radius: 20px; border: 1px solid rgba(0,240,255,0.3); background: rgba(255,255,255,0.05); color: white; outline: none; box-sizing: border-box;}
-        .search-box input:focus { border-color: var(--neon); box-shadow: 0 0 10px rgba(0,240,255,0.2); }
+        .menu-btn { background: none; border: none; color: var(--neon); font-size: 26px; cursor: pointer; text-shadow: 0 0 10px var(--neon);}
         
-        .header-logo { text-align: center; padding: 15px; }
-        .header-logo h2 { margin: 0; color: var(--neon); text-shadow: 0 0 10px rgba(0,240,255,0.4); }
+        .header-logo { text-align: center; padding: 20px 15px; }
+        .header-logo h2 { margin: 0; color: var(--neon); font-size: 24px; text-shadow: 0 0 10px rgba(0,240,255,0.4); }
+        .header-logo p { color: var(--warning); margin: 5px 0 0 0; font-size: 14px; }
         
         .container { padding: 15px; }
-        .main-btn { background: var(--card); border: 1px solid var(--neon); color: var(--text); padding: 18px; width: 100%; border-radius: 12px; font-size: 16px; font-weight: bold; margin-bottom: 15px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; box-sizing: border-box; }
-        .main-btn:active { transform: scale(0.97); }
+        .grid-list { display: grid; grid-template-columns: 1fr; gap: 15px; }
         
-        .grid-list { display: grid; grid-template-columns: 1fr; gap: 10px; }
-        .item-card { background: rgba(255,255,255,0.03); padding: 15px; border-radius: 10px; display: flex; justify-content: space-between; align-items: center; border: 1px solid rgba(255,255,255,0.08); }
-        .action-btn { background: var(--neon); color: #000; border: none; padding: 8px 15px; border-radius: 8px; font-weight: bold; cursor: pointer; }
+        .item-card { background: rgba(255,255,255,0.03); padding: 15px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.08); display: flex; flex-direction: column; gap: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);}
+        .item-card-row { display: flex; gap: 15px; align-items: center;}
+        .item-img { width: 80px; height: 100px; border-radius: 8px; object-fit: cover; background: #222; }
+        .item-info { flex-grow: 1; }
+        .item-title { margin: 0 0 5px 0; color: var(--neon); font-size: 16px;}
+        .item-desc { margin: 0; font-size: 13px; color: #aaa; line-height: 1.4;}
+        .item-price-row { display: flex; justify-content: space-between; align-items: center; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 10px;}
+        .item-price { color: var(--success); font-weight: bold; font-size: 16px;}
         
-        /* القائمة الجانبية (Drawer) */
-        .drawer { position: fixed; top: 0; right: -100%; width: 80%; height: 100%; background: #0f172a; z-index: 2000; transition: 0.3s; border-left: 2px solid var(--neon); padding: 20px; box-sizing: border-box; display: flex; flex-direction: column; }
+        .action-btn { background: var(--neon); color: #000; border: none; padding: 10px 20px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 14px;}
+        .action-btn:disabled { background: #444; color: #888; cursor: not-allowed; }
+        .btn-green { background: var(--success); color: white; }
+        
+        /* القائمة الجانبية المتقدمة */
+        .drawer { position: fixed; top: 0; right: -100%; width: 80%; height: 100%; background: #0f172a; z-index: 2000; transition: 0.3s; border-left: 2px solid var(--neon); padding: 20px; box-sizing: border-box; display: flex; flex-direction: column; overflow-y: auto;}
         .drawer.open { right: 0; }
-        .close-btn { text-align: left; font-size: 24px; color: var(--accent); cursor: pointer; }
+        .drawer-menu-item { padding: 15px; margin-bottom: 10px; background: rgba(255,255,255,0.05); border-radius: 8px; color: white; font-weight: bold; cursor: pointer; border: 1px solid transparent; display: flex; align-items: center; gap: 10px;}
+        .drawer-menu-item:active { background: rgba(0,240,255,0.1); border-color: var(--neon);}
         
-        .loyalty-points { background: rgba(16, 185, 129, 0.1); border: 1px solid var(--success); padding: 10px; border-radius: 10px; text-align: center; margin: 15px 0; color: var(--success); font-weight: bold; }
+        /* النوافذ الكاملة (الدفع والإدارة) */
+        .full-screen-view { display: none; position: fixed; top:0; left:0; width:100%; height:100%; background: var(--bg); z-index: 3000; padding: 20px; box-sizing: border-box; overflow-y: auto; }
+        .full-screen-view input, .full-screen-view textarea, .full-screen-view select { width: 100%; padding: 14px; margin-bottom: 15px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.05); color: white; box-sizing: border-box; font-family: inherit; font-size: 15px;}
         
-        /* شاشة الدفع */
-        .checkout-box { display: none; position: fixed; top:0; left:0; width:100%; height:100%; background: var(--bg); z-index: 3000; padding: 20px; box-sizing: border-box; overflow-y: auto; }
-        .checkout-box input { width: 100%; padding: 12px; margin-bottom: 12px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.05); color: white; box-sizing: border-box; }
+        .admin-card { background: rgba(255,0,127,0.05); border: 1px solid var(--accent); padding: 20px; border-radius: 12px; margin-bottom: 20px; }
         
-        /* لوحة تحكم الأونر */
-        .admin-panel { display: none; position: fixed; top:0; left:0; width:100%; height:100%; background: var(--bg); z-index: 4000; padding: 20px; box-sizing: border-box; overflow-y: auto; }
+        /* زر رفع الصورة */
+        .upload-wrapper { position: relative; overflow: hidden; width: 100%; margin-bottom: 15px; }
+        .upload-wrapper input[type=file] { position: absolute; left: 0; top: 0; opacity: 0; cursor: pointer; height: 100%; width: 100%;}
+        .upload-btn-ui { border: 2px dashed var(--neon); color: var(--neon); background: rgba(0,240,255,0.05); padding: 20px; border-radius: 8px; font-weight: bold; text-align: center; }
+        .img-preview { width: 100%; max-height: 200px; object-fit: contain; margin-bottom: 15px; display: none; border-radius: 8px;}
+        
+        .toast { visibility: hidden; min-width: 250px; background: var(--success); color: #fff; text-align: center; border-radius: 8px; padding: 16px; position: fixed; z-index: 4000; left: 50%; top: 30px; transform: translateX(-50%); font-weight: bold; opacity: 0; transition: 0.5s; }
+        .toast.show { visibility: visible; opacity: 1; top: 50px; }
     </style>
 </head>
 <body>
 
-    <!-- الشريط العلوي مع محرك البحث والماسح -->
+    <div id="toastAlert" class="toast">✅ تمت العملية بنجاح!</div>
+
     <div class="top-bar">
-        <button class="menu-btn" onclick="toggleDrawer()">☰</button>
-        <div class="search-box">
-            <input type="text" id="globalSearch" placeholder="ابحث عن مادة أو صف..." oninput="executeSearch()">
-        </div>
-        <button class="menu-btn" style="font-size: 20px;" onclick="scanQR()">📷</button>
+        <button class="menu-btn" onclick="toggleDrawer()">☰ القائمة</button>
+        <button class="action-btn btn-green" style="padding: 8px 15px;" onclick="viewCart()">🛒 السلة (<span id="cartCount">0</span>)</button>
     </div>
 
-    <div class="header-logo">
+    <div class="header-logo" id="mainHeader">
         <h2>📚 مكتبة ميم</h2>
-        <p style="color:var(--text-muted); font-size:13px;">تصفح الملازم والكتب بسهولة</p>
+        <p>اختر القسم من القائمة الجانبية أو تصفح الأحدث</p>
     </div>
     
-    <div class="container" id="contentArea">
-        <div id="view-main">
-            <button class="main-btn" onclick="openSection('books')">📘 الكتب المدرسية <span style="color:var(--neon);">🡐</span></button>
-            <button class="main-btn" onclick="openSection('malazim')">📙 الملازم الدراسية <span style="color:var(--neon);">🡐</span></button>
-        </div>
-    </div>
+    <div class="container" id="contentArea"></div>
     
-    <!-- القائمة الجانبية (السلة والإعدادات) -->
+    <!-- القائمة الجانبية (Menu) -->
     <div class="drawer" id="sideDrawer">
-        <div class="close-btn" onclick="toggleDrawer()">✕</div>
-        <h2 style="color:var(--neon); margin-top:0;">القائمة والسلة</h2>
-        
-        <div class="loyalty-points">⭐ نقاط الولاء: <span id="userPoints">0</span> نقطة</div>
-        
-        <div id="cartItemsList" style="flex-grow:1; overflow-y:auto; margin-bottom:15px;">
-            <p style="color:var(--text-muted); text-align:center;">السلة فارغة</p>
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+            <h2 style="color:var(--neon); margin:0;">القائمة الرئيسية</h2>
+            <div onclick="toggleDrawer()" style="font-size:24px; color:var(--accent); cursor:pointer;">✕</div>
         </div>
         
-        <h3 id="drawerTotal" style="color:var(--neon);">الإجمالي: 0 د.ع</h3>
-        <button class="main-btn" style="background:var(--success); color:black; border:none; justify-content:center;" onclick="openCheckout()">إتمام الطلب 🛒</button>
+        <div class="drawer-menu-item" onclick="loadCategory('الرئيسية')">🏠 الصفحة الرئيسية</div>
+        <div class="drawer-menu-item" onclick="loadCategory('الكتب والملازم')">📚 الكتب والملازم المدرسية</div>
+        <div class="drawer-menu-item" onclick="loadCategory('القرطاسية')">✏️ القرطاسية والأدوات</div>
+        <div class="drawer-menu-item" onclick="loadCategory('دفاتر مدرسية')">📓 دفاتر مدرسية</div>
+        <div class="drawer-menu-item" onclick="loadCategory('دفاتر جامعية')">📘 دفاتر جامعية</div>
         
         <hr style="border-color:rgba(255,255,255,0.1); width:100%; margin: 20px 0;">
-        <button class="action-btn" style="background:#333; color:white; width:100%;" onclick="openAdminLogin()">⚙️ تفعيل حساب الأونر</button>
+        <div class="drawer-menu-item" style="background:rgba(255,0,127,0.1); border-color:var(--accent);" onclick="openAdminPanel()">👑 دخول الأونر (الإدارة)</div>
     </div>
 
-    <!-- شاشة الدفع -->
-    <div class="checkout-box" id="checkoutView">
-        <h2 style="color:var(--neon);">تأكيد الطلب</h2>
+    <!-- شاشة السلة والدفع -->
+    <div class="full-screen-view" id="checkoutView">
+        <h2 style="color:var(--neon);">🛒 سلة المشتريات</h2>
+        <div id="cartItemsList" style="margin-bottom:20px;"></div>
+        <h3 id="checkoutTotal" style="color:var(--success); border-bottom:1px solid #333; padding-bottom:10px;">الإجمالي: 0 د.ع</h3>
+        
+        <h4 style="margin-top:20px;">📍 معلومات التوصيل</h4>
         <input type="text" id="custName" placeholder="الاسم الكامل">
-        <input type="tel" id="custPhone" placeholder="رقم الهاتف">
+        <input type="tel" id="custPhone" placeholder="رقم الهاتف (11 رقم فقط)" maxlength="11">
         <input type="text" id="custAddress" placeholder="المحافظة - المنطقة - أقرب نقطة دالة">
         
-        <button class="main-btn" style="justify-content:center; background:var(--neon); color:black; border:none;" onclick="submitOrder()">إرسال الطلب للنظام ✅</button>
-        <button class="main-btn" style="justify-content:center; background:rgba(255,255,255,0.1); border:none;" onclick="closeCheckout()">إلغاء الرجوع</button>
+        <div style="display:flex; gap:10px; margin-top:20px;">
+            <button class="action-btn btn-green" style="flex:2; font-size:16px;" onclick="submitOrder()">إرسال الطلب ✅</button>
+            <button class="action-btn" style="flex:1; background:#444; color:white;" onclick="document.getElementById('checkoutView').style.display='none'">رجوع</button>
+        </div>
     </div>
 
-    <!-- لوحة تحكم الأونر -->
-    <div class="admin-panel" id="adminView">
-        <h2 style="color:var(--accent);">👑 لوحة تحكم الأونر</h2>
-        <p style="color:var(--text-muted);">مرحباً بك في غرفة التحكم المتقدمة.</p>
+    <!-- لوحة تحكم الأونر الشاملة -->
+    <div class="full-screen-view" id="adminView">
+        <h2 style="color:var(--accent);">👑 لوحة تحكم الإدارة</h2>
         
-        <div class="item-card" style="border-color:var(--accent); margin-bottom:15px;">
-            <b>تعديل السعر الموحد للكتب</b>
-            <input type="number" id="adminBookPrice" value="5000" style="width:70px; padding:5px; border-radius:5px; text-align:center;">
-        </div>
-        <div class="item-card" style="border-color:var(--accent); margin-bottom:15px;">
-            <b>تعديل السعر الموحد للملازم</b>
-            <input type="number" id="adminMalzamaPrice" value="10000" style="width:70px; padding:5px; border-radius:5px; text-align:center;">
+        <div class="admin-card">
+            <h4 id="adminFormTitle" style="margin-top:0; color:var(--neon);">➕ إضافة / تعديل منتج</h4>
+            <input type="hidden" id="prodId">
+            
+            <input type="text" id="prodName" placeholder="اسم المنتج (مثال: ملزمة، دفتر، قلم)">
+            
+            <select id="prodCategory">
+                <option value="" disabled selected>-- اختر القسم الذي سيظهر فيه --</option>
+                <optgroup label="الدراسة">
+                    <option value="الكتب والملازم">الكتب والملازم المدرسية</option>
+                </optgroup>
+                <optgroup label="المنوعات">
+                    <option value="القرطاسية">القرطاسية</option>
+                    <option value="دفاتر مدرسية">دفاتر مدرسية</option>
+                    <option value="دفاتر جامعية">دفاتر جامعية</option>
+                </optgroup>
+            </select>
+
+            <div style="display:flex; gap:10px;">
+                <input type="number" id="prodPrice" placeholder="السعر (بالآلاف)">
+                <input type="number" id="prodStock" placeholder="الكمية المتوفرة">
+            </div>
+            
+            <div class="upload-wrapper">
+                <div class="upload-btn-ui">📸 اضغط لرفع صورة المنتج</div>
+                <input type="file" id="prodImgFile" accept="image/*" onchange="previewImage(event)">
+            </div>
+            <img id="imgPreviewTag" class="img-preview">
+            <input type="hidden" id="prodImgBase64">
+            
+            <textarea id="prodDesc" rows="3" placeholder="وصف المنتج وتفاصيله..."></textarea>
+            
+            <div style="display:flex; gap:10px;">
+                <button class="action-btn btn-green" style="flex:1;" onclick="saveProduct()">💾 حفظ في النظام</button>
+                <button class="action-btn" style="background:#444; color:white;" onclick="resetAdminForm()">إفراغ الحقول</button>
+            </div>
         </div>
         
-        <button class="action-btn" style="width:100%; background:var(--accent); color:white; margin-bottom:10px;" onclick="saveAdminSettings()">💾 حفظ التعديلات في النظام</button>
-        <button class="main-btn" style="justify-content:center; background:rgba(255,255,255,0.1); border:none;" onclick="closeAdmin()">خروج من لوحة التحكم</button>
+        <div class="admin-card">
+            <h4 style="margin-top:0; color:var(--warning);">🛠️ إدارة المنتجات المضافة</h4>
+            <div id="adminProductsList"></div>
+        </div>
+
+        <button class="action-btn" style="width:100%; background:rgba(255,255,255,0.1); color:white;" onclick="document.getElementById('adminView').style.display='none'; loadCategory('الرئيسية');">خروج من الإدارة</button>
     </div>
 
     <script>
@@ -118,205 +160,234 @@
         tg.ready();
         
         let cart = {};
-        let loyaltyPoints = 0;
-        
-        // أسعار قابلة للتعديل من لوحة الأونر (تخزن في LocalStorage)
-        let configPrices = {
-            book: localStorage.getItem('priceBook') ? parseInt(localStorage.getItem('priceBook')) : 5000,
-            malzama: localStorage.getItem('priceMalzama') ? parseInt(localStorage.getItem('priceMalzama')) : 10000,
-            package: 25000
-        };
+        let productsDB = JSON.parse(localStorage.getItem('mimProductsDB')) || [];
 
-        // استرجاع نقاط الولاء سحابياً
-        tg.CloudStorage.getItem('loyaltyPoints', function(err, val) {
-            if(!err && val) {
-                loyaltyPoints = parseInt(val);
-                document.getElementById('userPoints').innerText = loyaltyPoints;
-            }
-        });
-
-        // هيكلية البيانات الأساسية للبحث والعرض
-        const database = {
-            primary: ['الرابع الابتدائي', 'الخامس الابتدائي', 'السادس الابتدائي'],
-            middle: ['الأول المتوسط', 'الثاني المتوسط', 'الثالث المتوسط'],
-            high: ['الرابع الإعدادي', 'الخامس الإعدادي', 'السادس الإعدادي']
-        };
-        const subjectsList = ['الرياضيات', 'العلوم', 'اللغة الإنجليزية', 'اللغة العربية', 'التربية الإسلامية'];
-        const teachers = ['أ. حيدر وليد', 'أ. حيدر عبد الأئمة'];
-
-        let currentMode = ''; 
-        let tempGrade = '';
-
-        function renderHTML(html) { document.getElementById('contentArea').innerHTML = html; }
+        function showToast(msg) {
+            tg.HapticFeedback.notificationOccurred('success');
+            let toast = document.getElementById("toastAlert");
+            toast.innerText = msg;
+            toast.className = "toast show";
+            setTimeout(() => { toast.className = toast.className.replace("show", ""); }, 3000);
+        }
 
         function toggleDrawer() { 
             tg.HapticFeedback.impactOccurred('light');
             document.getElementById('sideDrawer').classList.toggle('open'); 
-            updateCartUI();
-        }
-        
-        function scanQR() {
-            tg.HapticFeedback.impactOccurred('medium');
-            tg.showScanQrPopup({text: "وجّه الكاميرا نحو باركود الملزمة"}, function(text) {
-                tg.showAlert("تم قراءة الباركود: " + text + "\n(سيتم ربطها بقاعدة البيانات قريباً)");
-                return true; 
-            });
         }
 
-        // خوارزمية البحث الذكية
-        function executeSearch() {
-            let query = document.getElementById('globalSearch').value.trim();
-            if(query.length < 2) {
-                if(query.length === 0) renderHTML(`<div id="view-main"><button class="main-btn" onclick="openSection('books')">📘 الكتب المدرسية <span style="color:var(--neon);">🡐</span></button><button class="main-btn" onclick="openSection('malazim')">📙 الملازم الدراسية <span style="color:var(--neon);">🡐</span></button></div>`);
-                return;
-            }
+        // نظام التنقل وعرض الأقسام
+        function loadCategory(categoryName) {
+            toggleDrawer();
+            document.getElementById('mainHeader').innerHTML = `<h2>${categoryName === 'الرئيسية' ? '📚 أحدث المنتجات' : categoryName}</h2>`;
             
-            // بحث بسيط يولد نتائج فورية
-            let html = '<div class="grid-list"><h3 style="color:var(--neon); margin:0;">نتائج البحث:</h3>';
-            Object.keys(database).forEach(stage => {
-                database[stage].forEach(grade => {
-                    if(grade.includes(query) || query.includes('رياضيات') || query.includes('علوم')) {
-                        html += `<div class="item-card" onclick="openSubjects('${grade}', '${stage}')">
-                                    <b>${grade}</b> <span style="color:var(--neon);">عرض 🡐</span>
-                                 </div>`;
-                    }
-                });
-            });
-            html += '</div>';
-            renderHTML(html);
-        }
-
-        function openSection(mode) {
-            currentMode = mode;
             let html = '<div class="grid-list">';
-            html += `<button class="main-btn" onclick="openStage('primary')">المرحلة الابتدائية (4-6) 🡐</button>`;
-            html += `<button class="main-btn" onclick="openStage('middle')">المرحلة المتوسطة 🡐</button>`;
-            html += `<button class="main-btn" onclick="openStage('high')">المرحلة الإعدادية 🡐</button>`;
-            html += '</div>';
-            renderHTML(html);
-        }
+            let filteredProducts = categoryName === 'الرئيسية' 
+                ? productsDB.slice().reverse().slice(0, 10) // عرض أحدث 10 في الرئيسية
+                : productsDB.filter(p => p.category === categoryName).reverse();
 
-        function openStage(stageId) {
-            let html = '<div class="grid-list">';
-            database[stageId].forEach(g => {
-                html += `<div class="item-card" onclick="openSubjects('${g}', '${stageId}')">
-                            <b>${g}</b> <span style="color:var(--neon);">المواد 🡐</span>
+            if(filteredProducts.length === 0) {
+                html += `<div style="text-align:center; padding:40px 20px; color:#aaa;">
+                            <h3>القسم فارغ حالياً</h3>
+                            <p>يمكن للإدارة إضافة منتجات هنا من لوحة التحكم.</p>
                          </div>`;
-            });
-            html += '</div>';
-            renderHTML(html);
-        }
-
-        function openSubjects(grade, stageId) {
-            tempGrade = grade;
-            let html = '<div class="grid-list">';
-            let subs = [...subjectsList];
-            if(stageId !== 'high') subs.push('الاجتماعيات');
-
-            if(currentMode === 'books') {
-                html += `<div class="item-card" style="border-color:var(--success);">
-                            <b style="color:var(--success);">باكج دراسي كامل</b>
-                            <button class="action-btn" onclick="addToCart('${grade} - باكج كامل', ${configPrices.package})">${configPrices.package.toLocaleString()} د.ع</button>
-                         </div>`;
-                subs.forEach(s => {
-                    html += `<div class="item-card"><b>كتاب ${s}</b><button class="action-btn" onclick="addToCart('${grade} - كتاب ${s}', ${configPrices.book})">${configPrices.book.toLocaleString()} د.ع</button></div>`;
-                });
             } else {
-                subs.forEach(s => {
-                    html += `<div class="item-card" onclick="addToCart('${grade} - ملزمة ${s} (${teachers[0]})', ${configPrices.malzama})">
-                                <b>ملزمة ${s}</b><span style="color:var(--neon); font-size:12px;">+ إضافة للسلة</span>
-                             </div>`;
+                filteredProducts.forEach(p => {
+                    let price = parseInt(p.price).toLocaleString();
+                    let stockStatus = p.stock > 0 
+                        ? `<button class="action-btn btn-green" onclick="addToCart('${p.id}')">إضافة للسلة</button>`
+                        : `<button class="action-btn" disabled>نفذت الكمية</button>`;
+                    
+                    let imgHtml = p.img ? `<img src="${p.img}" class="item-img">` : `<div class="item-img" style="display:flex; align-items:center; justify-content:center; font-size:24px;">📦</div>`;
+
+                    html += `
+                    <div class="item-card">
+                        <div class="item-card-row">
+                            ${imgHtml}
+                            <div class="item-info">
+                                <h3 class="item-title">${p.name}</h3>
+                                <p class="item-desc">${p.desc}</p>
+                            </div>
+                        </div>
+                        <div class="item-price-row">
+                            <span class="item-price">${price} د.ع</span>
+                            ${stockStatus}
+                        </div>
+                    </div>`;
                 });
             }
             html += '</div>';
-            renderHTML(html);
+            document.getElementById('contentArea').innerHTML = html;
         }
 
-        function addToCart(name, price) {
+        // نظام السلة
+        function addToCart(productId) {
             tg.HapticFeedback.notificationOccurred('success');
-            if(!cart[name]) cart[name] = { price: price, qty: 1 };
-            else cart[name].qty++;
-            tg.showAlert(`تمت الإضافة: ${name}`);
+            let p = productsDB.find(x => x.id == productId);
+            if(!p) return;
+            
+            if(!cart[p.name]) {
+                cart[p.name] = { id: p.id, price: p.price, qty: 1 };
+            } else {
+                if(cart[p.name].qty >= p.stock) return tg.showAlert("لا توجد كمية كافية في المخزن!");
+                cart[p.name].qty++;
+            }
+            updateCartIcon();
+            showToast(`تمت إضافة ${p.name} للسلة`);
         }
 
-        function updateCartUI() {
-            let total = 0;
-            let html = '';
+        function updateCartIcon() {
+            let count = Object.values(cart).reduce((sum, item) => sum + item.qty, 0);
+            document.getElementById('cartCount').innerText = count;
+        }
+
+        function viewCart() {
+            if(Object.keys(cart).length === 0) return tg.showAlert("السلة فارغة!");
+            
+            let total = 0; let html = '';
             for(let k in cart) {
                 total += cart[k].price * cart[k].qty;
-                html += `<div style="background:rgba(255,255,255,0.05); padding:10px; margin-bottom:5px; border-radius:5px; font-size:14px; display:flex; justify-content:space-between;">
-                            <span>${cart[k].qty}x ${k}</span>
-                            <span style="color:var(--success);">${(cart[k].price * cart[k].qty).toLocaleString()}</span>
-                         </div>`;
+                html += `
+                <div style="background:rgba(255,255,255,0.05); padding:15px; border-radius:8px; margin-bottom:10px; display:flex; justify-content:space-between; align-items:center;">
+                    <div><b>${k}</b><br><span style="color:#aaa; font-size:13px;">الكمية: ${cart[k].qty}</span></div>
+                    <span style="color:var(--success); font-weight:bold;">${(cart[k].price * cart[k].qty).toLocaleString()} د.ع</span>
+                </div>`;
             }
-            document.getElementById('cartItemsList').innerHTML = html || '<p style="text-align:center;">السلة فارغة</p>';
-            document.getElementById('drawerTotal').innerText = `الإجمالي: ${total.toLocaleString()} د.ع`;
-        }
-
-        function openCheckout() {
-            if(Object.keys(cart).length === 0) return tg.showAlert("السلة فارغة!");
-            document.getElementById('sideDrawer').classList.remove('open');
+            document.getElementById('cartItemsList').innerHTML = html;
+            document.getElementById('checkoutTotal').innerText = `الإجمالي: ${total.toLocaleString()} د.ع`;
             document.getElementById('checkoutView').style.display = 'block';
         }
 
-        function closeCheckout() { document.getElementById('checkoutView').style.display = 'none'; }
-
-        // نظام الأونر السري
-        function openAdminLogin() {
-            let code = prompt("أدخل رمز الأونر السري:");
-            if(code === "ALI2026") {
-                tg.HapticFeedback.notificationOccurred('success');
-                document.getElementById('sideDrawer').classList.remove('open');
-                document.getElementById('adminView').style.display = 'block';
-            } else {
-                tg.HapticFeedback.notificationOccurred('error');
-                alert("الرمز غير صحيح!");
-            }
-        }
-        
-        function saveAdminSettings() {
-            localStorage.setItem('priceBook', document.getElementById('adminBookPrice').value);
-            localStorage.setItem('priceMalzama', document.getElementById('adminMalzamaPrice').value);
-            configPrices.book = parseInt(document.getElementById('adminBookPrice').value);
-            configPrices.malzama = parseInt(document.getElementById('adminMalzamaPrice').value);
-            tg.showAlert("✅ تم تحديث الأسعار في النظام المحلي بنجاح!");
-        }
-
-        function closeAdmin() { document.getElementById('adminView').style.display = 'none'; }
-
-        // الإرسال الفعلي المحمي
         function submitOrder() {
             let name = document.getElementById('custName').value.trim();
             let phone = document.getElementById('custPhone').value.trim();
             let addr = document.getElementById('custAddress').value.trim();
             
-            if(!name || !phone || !addr) {
-                tg.HapticFeedback.notificationOccurred('error');
-                return tg.showAlert('⚠️ يرجى ملء كافة معلومات التوصيل!');
-            }
+            if(!/^\d{11}$/.test(phone)) return tg.showAlert("⚠️ رقم الهاتف يجب أن يكون 11 رقم بالضبط.");
+            if(!name || !addr) return tg.showAlert('⚠️ يرجى ملء كافة المعلومات.');
             
-            let total = 0;
-            let itemsArr = [];
+            let total = 0; let itemsArr = [];
             for(let k in cart) {
                 itemsArr.push({ name: `${cart[k].qty}x ${k}`, price: cart[k].price * cart[k].qty });
                 total += cart[k].price * cart[k].qty;
+                
+                // خصم الكمية من المخزن محلياً
+                let prodIndex = productsDB.findIndex(x => x.name === k);
+                if(prodIndex > -1) {
+                    productsDB[prodIndex].stock -= cart[k].qty;
+                }
             }
-            
-            // إضافة 5 نقاط ولاء عند الطلب
-            loyaltyPoints += 5;
-            tg.CloudStorage.setItem('loyaltyPoints', loyaltyPoints.toString());
+            localStorage.setItem('mimProductsDB', JSON.stringify(productsDB));
             
             let data = { customer_name: name, customer_phone: phone, customer_address: addr, items: itemsArr, total_price: total };
-            
             tg.HapticFeedback.notificationOccurred('success');
-            
-            // إرسال البيانات وإغلاق الواجهة
-            try {
-                tg.sendData(JSON.stringify(data));
-            } catch(e) {
-                alert("حدث خطأ أثناء الإرسال، تأكد من تحديث تليجرام.");
+            tg.sendData(JSON.stringify(data));
+        }
+
+        // ================= نظام الإدارة (الأونر) =================
+        function openAdminPanel() {
+            let code = prompt("أدخل رمز الأونر:");
+            if(code === "ALI2026") {
+                toggleDrawer();
+                document.getElementById('adminView').style.display = 'block';
+                renderAdminProducts();
+            } else {
+                tg.showAlert("❌ الكود غير صحيح.");
             }
         }
+
+        function previewImage(event) {
+            let file = event.target.files[0];
+            if(file) {
+                let reader = new FileReader();
+                reader.onload = function(e) {
+                    document.getElementById('imgPreviewTag').src = e.target.result;
+                    document.getElementById('imgPreviewTag').style.display = 'block';
+                    document.getElementById('prodImgBase64').value = e.target.result;
+                }
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function saveProduct() {
+            let id = document.getElementById('prodId').value;
+            let name = document.getElementById('prodName').value;
+            let category = document.getElementById('prodCategory').value;
+            let price = parseInt(document.getElementById('prodPrice').value);
+            let stock = parseInt(document.getElementById('prodStock').value);
+            let img = document.getElementById('prodImgBase64').value;
+            let desc = document.getElementById('prodDesc').value;
+            
+            if(!name || !category || !price || isNaN(stock)) return tg.showAlert("يرجى ملء الاسم، القسم، السعر، والكمية!");
+            
+            let prodObj = { id: id ? parseInt(id) : Date.now(), name, category, price, stock, img, desc };
+            
+            if(id) {
+                let idx = productsDB.findIndex(p => p.id == id);
+                if(idx > -1) productsDB[idx] = prodObj;
+                showToast("✅ تم التعديل بنجاح!");
+            } else {
+                productsDB.push(prodObj);
+                showToast("✅ تمت الإضافة للمتجر!");
+            }
+            
+            localStorage.setItem('mimProductsDB', JSON.stringify(productsDB));
+            resetAdminForm();
+            renderAdminProducts();
+        }
+
+        function editProduct(id) {
+            let p = productsDB.find(x => x.id == id);
+            if(p) {
+                document.getElementById('prodId').value = p.id;
+                document.getElementById('prodName').value = p.name;
+                document.getElementById('prodCategory').value = p.category;
+                document.getElementById('prodPrice').value = p.price;
+                document.getElementById('prodStock').value = p.stock;
+                document.getElementById('prodDesc').value = p.desc;
+                if(p.img) {
+                    document.getElementById('imgPreviewTag').src = p.img;
+                    document.getElementById('imgPreviewTag').style.display = 'block';
+                    document.getElementById('prodImgBase64').value = p.img;
+                }
+                document.getElementById('adminFormTitle').innerText = "✏️ تعديل المنتج";
+                document.getElementById('adminView').scrollTo(0,0);
+            }
+        }
+
+        function deleteProduct(id) {
+            if(confirm("هل أنت متأكد من الحذف؟")) {
+                productsDB = productsDB.filter(x => x.id != id);
+                localStorage.setItem('mimProductsDB', JSON.stringify(productsDB));
+                renderAdminProducts();
+            }
+        }
+
+        function resetAdminForm() {
+            document.querySelectorAll('#adminView input, #adminView textarea, #adminView select').forEach(el => el.value = '');
+            document.getElementById('imgPreviewTag').style.display = 'none';
+            document.getElementById('adminFormTitle').innerText = "➕ إضافة منتج جديد";
+        }
+
+        function renderAdminProducts() {
+            let html = '';
+            productsDB.slice().reverse().forEach(p => {
+                html += `
+                <div style="background:rgba(255,255,255,0.05); padding:15px; border-radius:8px; margin-bottom:10px; border: 1px solid rgba(255,255,255,0.1);">
+                    <div style="display:flex; justify-content:space-between; margin-bottom:10px;">
+                        <div><b>${p.name}</b><br><span style="font-size:12px; color:var(--warning);">${p.category} | المخزون: ${p.stock}</span></div>
+                        <span style="color:var(--success); font-weight:bold;">${parseInt(p.price).toLocaleString()} د.ع</span>
+                    </div>
+                    <div style="display:flex; gap:10px;">
+                        <button class="action-btn" style="flex:1; background:var(--warning);" onclick="editProduct(${p.id})">✏️ تعديل</button>
+                        <button class="action-btn" style="flex:1; background:var(--accent); color:white;" onclick="deleteProduct(${p.id})">🗑️ حذف</button>
+                    </div>
+                </div>`;
+            });
+            document.getElementById('adminProductsList').innerHTML = html;
+        }
+
+        // تشغيل الواجهة الافتراضية
+        loadCategory('الرئيسية');
     </script>
 </body>
 </html>
